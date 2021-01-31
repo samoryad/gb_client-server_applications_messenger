@@ -1,4 +1,5 @@
 /lesson_01/samples/
+.idea
 # Default ignored files
 /shelf/
 /workspace.xml
@@ -136,4 +137,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-.idea
