@@ -1,0 +1,10 @@
+dict:
+  '1': €
+  '2': Ÿ
+  '3': Ω
+list:
+- some
+- info
+- to
+- yaml
+number: 30
