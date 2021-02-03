@@ -26,23 +26,22 @@ def get_data():
             list_os = csv.reader(file, delimiter=':')
             for row in list_os:
                 if names_list[0] in row:
-                    row_no_spaces = re.sub(r'^\s+', '', row[1])
+                    row_no_spaces = re.sub(r'^\s+|\s+$', '', row[1])
                     os_prod_list.append(row_no_spaces)
                 if names_list[1] in row:
-                    row_no_spaces = re.sub(r'^\s+', '', row[1])
+                    row_no_spaces = re.sub(r'^\s+|\s+$', '', row[1])
                     os_name_list.append(row_no_spaces)
                 if names_list[2] in row:
-                    row_no_spaces = re.sub(r'^\s+', '', row[1])
+                    row_no_spaces = re.sub(r'^\s+|\s+$', '', row[1])
                     os_code_list.append(row_no_spaces)
                 if names_list[3] in row:
-                    row_no_spaces = re.sub(r'^\s+', '', row[1])
+                    row_no_spaces = re.sub(r'^\s+|\s+$', '', row[1])
                     os_type_list.append(row_no_spaces)
     main_data.append(names_list)
     main_data.append(os_prod_list)
     main_data.append(os_name_list)
     main_data.append(os_code_list)
     main_data.append(os_type_list)
-    print(main_data)
     return main_data
 
 
