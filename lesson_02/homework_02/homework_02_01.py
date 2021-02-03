@@ -59,4 +59,5 @@ def write_to_csv():
             f_n_writer.writerow(row)
 
 
+# c. Проверить работу программы через вызов функции write_to_csv().
 write_to_csv()
