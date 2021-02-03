@@ -19,33 +19,44 @@ def get_data():
     os_name_list = []
     os_code_list = []
     os_type_list = []
-    main_data = ['Изготовитель системы', 'Название ОС', 'Код продукта', 'Тип системы']
+    main_data = []
+    names_list = ['Изготовитель системы', 'Название ОС', 'Код продукта', 'Тип системы']
     for i in range(1, 4):
         with open(f'info_{i}.txt', encoding='windows-1251') as file:
             list_os = csv.reader(file, delimiter=':')
             for row in list_os:
-                if main_data[0] in row:
+                if names_list[0] in row:
                     row_no_spaces = re.sub(r'^\s+', '', row[1])
                     os_prod_list.append(row_no_spaces)
-                if main_data[1] in row:
+                if names_list[1] in row:
                     row_no_spaces = re.sub(r'^\s+', '', row[1])
                     os_name_list.append(row_no_spaces)
-                if main_data[2] in row:
+                if names_list[2] in row:
                     row_no_spaces = re.sub(r'^\s+', '', row[1])
                     os_code_list.append(row_no_spaces)
-                if main_data[3] in row:
+                if names_list[3] in row:
                     row_no_spaces = re.sub(r'^\s+', '', row[1])
                     os_type_list.append(row_no_spaces)
-
+    main_data.append(names_list)
     main_data.append(os_prod_list)
     main_data.append(os_name_list)
     main_data.append(os_code_list)
     main_data.append(os_type_list)
-    print(os_prod_list)
-    print(os_name_list)
-    print(os_code_list)
-    print(os_type_list)
     print(main_data)
+    return main_data
 
 
 get_data()
+
+
+# b. Создать функцию write_to_csv(), в которую передавать ссылку на CSV-файл. В этой функции
+# реализовать получение данных через вызов функции get_data(), а также сохранение подготовленных
+# данных в соответствующий CSV-файл;
+def write_to_csv():
+    with open('get_data_to_csv_write.csv', 'w', encoding='utf-8') as f_n:
+        f_n_writer = csv.writer(f_n)
+        for row in get_data():
+            f_n_writer.writerow(row)
+
+
+write_to_csv()
