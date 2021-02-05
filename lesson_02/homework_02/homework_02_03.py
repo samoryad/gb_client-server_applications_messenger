@@ -21,4 +21,9 @@ with open('file.yaml', 'w', encoding='utf-8') as f_n:
 
 # c. Реализовать считывание данных из созданного файла и проверить, совпадают ли они с исходными.
 with open('file.yaml', encoding='utf-8') as f_n:
-    print(f_n.read())
+    yaml_data = yaml.load(f_n, Loader=yaml.FullLoader)
+
+if yaml_data == data_to_yaml:
+    print('Совпадают')
+else:
+    print('Не совпадают')
