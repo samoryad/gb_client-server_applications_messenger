@@ -1,4 +1,5 @@
 import time
+import argparse
 from socket import socket, AF_INET, SOCK_STREAM
 # для реализации через configs.py
 # from common.configs import PORT, HOST
@@ -13,6 +14,14 @@ s = socket(AF_INET, SOCK_STREAM)
 # устанавливает соединение
 s.connect((get_settings()['host'], get_settings()['port']))
 
+
+# параметры командной строки скрипта client.py <addr> [<port>]:
+parser = argparse.ArgumentParser(description='command line client parameters')
+parser.add_argument('addr', type=str, help='server ip address')
+parser.add_argument('port', type=int, nargs='?', default=7777, help='port')
+args = parser.parse_args()
+print(args)
+
 # формирует presence-сообщение
 msg = {
     "action": "presence",
@@ -23,7 +32,6 @@ msg = {
         "status": "Привет, сервер!"
     }
 }
-
 # отправляет сообщение серверу;
 send_message(s, msg)
 # получает ответ сервера и разбирает сообщение сервера
