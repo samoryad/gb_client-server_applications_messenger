@@ -3,7 +3,7 @@ import os
 import sys
 
 
-# функция перевода сообщения из байтов с помощью json
+# функция приёма и перевода сообщения из байтов с помощью json
 def get_message(opened_socket, CONFIGS):
     response = opened_socket.recv(CONFIGS.get('MAX_PACKAGE_LENGTH'))
     if isinstance(response, bytes):
@@ -15,7 +15,7 @@ def get_message(opened_socket, CONFIGS):
     raise ValueError
 
 
-# функция перевода сообщения в байты с помощью json
+# функция перевода сообщения в байты с помощью json и отправки
 def send_message(opened_socket, message, CONFIGS):
     json_message = json.dumps(message)
     response = json_message.encode(CONFIGS.get('ENCODING'))
