@@ -1,9 +1,6 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-# Создание именованного логгера
-server_logger = logging.getLogger('server.main')
-
 # Сообщения лога должны иметь следующий формат: "<дата-время> <уровень_важности> <имя_модуля> <сообщение>"
 _log_format = f'%(asctime)s - %(levelname)s - %(module)s - %(message)s '
 # Создаем объект форматирования
@@ -17,7 +14,11 @@ file_handler.setFormatter(formatter)
 # На стороне сервера необходимо настроить ежедневную ротацию лог-файлов.
 time_rotating_handler = TimedRotatingFileHandler("log/server/server.main.log", when='d', interval=1,
                                                  backupCount=7, encoding='utf-8')
+# file_handler.setLevel(logging.DEBUG)
 time_rotating_handler.setFormatter(formatter)
+
+# Создание именованного логгера
+server_logger = logging.getLogger('server.main')
 
 # Добавляем в логгер новый обработчик событий и устанавливаем уровень логирования
 # server_logger.addHandler(file_handler)
