@@ -10,7 +10,7 @@ from log.log_decorator import Log
 CONFIGS = get_configs()
 
 
-@Log()
+@Log('DEBUG')
 # функция формирует presence-сообщение
 def create_presence_message(CONFIGS):
     message = {
@@ -25,7 +25,7 @@ def create_presence_message(CONFIGS):
     return message
 
 
-@Log()
+@Log('DEBUG')
 # функция проверки ответа сервера
 def check_response(message):
     if CONFIGS.get('RESPONSE') in message:
