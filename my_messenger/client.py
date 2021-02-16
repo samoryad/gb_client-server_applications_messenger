@@ -5,10 +5,12 @@ import argparse
 from socket import socket, AF_INET, SOCK_STREAM
 from common.utils import get_configs, get_message, send_message
 from log.client_log_config import client_logger
+from log.log_decorator import Log
 
 CONFIGS = get_configs()
 
 
+@Log()
 # функция формирует presence-сообщение
 def create_presence_message(CONFIGS):
     message = {
@@ -23,6 +25,7 @@ def create_presence_message(CONFIGS):
     return message
 
 
+@Log()
 # функция проверки ответа сервера
 def check_response(message):
     if CONFIGS.get('RESPONSE') in message:
@@ -73,7 +76,8 @@ def main():
     try:
         response = get_message(s, CONFIGS)
         checked_response = check_response(response)
-        print(f'Ответ от сервера: {checked_response}')
+        # print(f'Ответ от сервера: {checked_response}')
+        client_logger.info(f'Ответ от сервера: {checked_response}')
     except (ValueError, json.JSONDecodeError):
         # print('Ошибка декорирования сообщения')
         client_logger.error('Ошибка декорирования сообщения')

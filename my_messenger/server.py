@@ -4,10 +4,12 @@ import sys
 from socket import socket, AF_INET, SOCK_STREAM
 from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
+from log.log_decorator import Log
 
 CONFIGS = get_configs()
 
 
+@Log()
 # функция проверки сообщения клиента
 def check_message(message):
     if CONFIGS.get('ACTION') in message \

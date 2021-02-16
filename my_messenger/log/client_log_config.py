@@ -7,7 +7,7 @@ formatter = logging.Formatter(_log_format)
 
 # Создаем файловый обработчик логирования (можно задать кодировку)
 # Журналирование должно производиться в лог-файл
-file_handler = logging.FileHandler("client/client.main.log", encoding='utf-8')
+file_handler = logging.FileHandler("log/client/client.main.log", encoding='utf-8')
 # file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 
