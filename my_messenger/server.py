@@ -3,6 +3,7 @@ import json
 import sys
 from socket import socket, AF_INET, SOCK_STREAM
 from common.utils import get_configs, get_message, send_message
+from log.server_log_config import server_logger
 
 CONFIGS = get_configs()
 
@@ -14,10 +15,12 @@ def check_message(message):
             and CONFIGS.get('TIME') in message \
             and CONFIGS.get('USER') in message \
             and message[CONFIGS.get('USER')][CONFIGS.get("ACCOUNT_NAME")] == 'Samoryad':
+        server_logger.info('сообщение клиента успешно проверено. привет, клиент')
         return {
             CONFIGS.get('RESPONSE'): 200,
             CONFIGS.get('ALERT'): 'Привет, клиент!'
         }
+    server_logger.error('сообщение от клиента некорректно')
     return {
         CONFIGS.get('RESPONSE'): 400,
         CONFIGS.get('ERROR'): 'Bad request'
@@ -37,26 +40,27 @@ def main():
     try:
         if '-a' or '--addr' in sys.argv:
             listen_address = args.addr
-            print(listen_address)
         else:
             listen_address = ''
     except IndexError:
-        print('После \'-a\' - необходимо указать адрес')
+        # print('После \'-a\' - необходимо указать адрес')
+        server_logger.critical('После \'-a\' - необходимо указать адрес')
         sys.exit(1)
 
     try:
         if '-p' or '--port' in sys.argv:
             listen_port = args.port
-            print(listen_port)
         else:
             listen_port = CONFIGS.get('DEFAULT_PORT')
         if not 65535 >= listen_port >= 1024:
             raise ValueError
     except IndexError:
-        print('После -\'p\' необходимо указать порт')
+        # print('После -\'p\' необходимо указать порт')
+        server_logger.critical('После -\'p\' необходимо указать порт')
         sys.exit(1)
     except ValueError:
-        print('Порт должен быть указан в пределах от 1024 до 65535')
+        # print('Порт должен быть указан в пределах от 1024 до 65535')
+        server_logger.critical('Порт должен быть указан в пределах от 1024 до 65535')
         sys.exit(1)
 
     # сервер создаёт сокет
@@ -73,11 +77,13 @@ def main():
         try:
             message = get_message(client, CONFIGS)
             print(f'Сообщение: {message}, было отправлено клиентом: {addr}')
+            server_logger.debug(f'получено сообщение {message} от клиента {addr}')
             response = check_message(message)
             send_message(client, response, CONFIGS)
             client.close()
         except (ValueError, json.JSONDecodeError):
-            print('Принято некорректное сообщение от клиента')
+            # print('Принято некорректное сообщение от клиента')
+            server_logger.error('Принято некорректное сообщение от клиента')
             client.close()
 
 

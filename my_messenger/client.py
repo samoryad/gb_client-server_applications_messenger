@@ -4,6 +4,7 @@ import time
 import argparse
 from socket import socket, AF_INET, SOCK_STREAM
 from common.utils import get_configs, get_message, send_message
+from log.client_log_config import client_logger
 
 CONFIGS = get_configs()
 
@@ -26,7 +27,9 @@ def create_presence_message(CONFIGS):
 def check_response(message):
     if CONFIGS.get('RESPONSE') in message:
         if message[CONFIGS.get('RESPONSE')] == 200:
+            client_logger.debug('ответ от сервера получен')
             return f'200: OK, {message[CONFIGS.get("ALERT")]}'
+        client_logger.error('произошла ошибка ответа сервера')
         return f'400: {message[CONFIGS.get("ERROR")]}'
     raise ValueError
 
@@ -50,8 +53,10 @@ def main():
     except IndexError:
         server_address = CONFIGS.get('DEFAULT_IP_ADDRESS')
         server_port = CONFIGS.get('DEFAULT_PORT')
+        client_logger.warning('Подставлены значения адреса и порта по умолчанию')
     except ValueError:
-        print('Порт должен быть указан в пределах от 1024 до 65535')
+        # print('Порт должен быть указан в пределах от 1024 до 65535')
+        client_logger.critical('Порт должен быть указан в пределах от 1024 до 65535')
         sys.exit(1)
 
     # клиент создаёт сокет
@@ -70,7 +75,8 @@ def main():
         checked_response = check_response(response)
         print(f'Ответ от сервера: {checked_response}')
     except (ValueError, json.JSONDecodeError):
-        print('Ошибка декорирования сообщения')
+        # print('Ошибка декорирования сообщения')
+        client_logger.error('Ошибка декорирования сообщения')
 
     # закрывает соединение
     s.close()
