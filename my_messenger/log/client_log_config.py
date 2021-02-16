@@ -7,7 +7,7 @@ formatter = logging.Formatter(_log_format)
 
 # Создаем файловый обработчик логирования (можно задать кодировку)
 # Журналирование должно производиться в лог-файл
-file_handler = logging.FileHandler("log/client/client.main.log", encoding='utf-8')
+file_handler = logging.FileHandler("client/client.main.log", encoding='utf-8')
 # file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 
@@ -18,15 +18,16 @@ client_logger = logging.getLogger('client.main')
 client_logger.addHandler(file_handler)
 client_logger.setLevel(logging.DEBUG)
 
-'''
-# проверяем
-client_logger.info('Тестовый запуск логирования')
-client_logger.warning('Тестовый запуск логирования')
 
-# меняем уровень логирования
-client_logger.setLevel(logging.WARNING)
+if __name__ == '__main__':
+    # проверяем
+    client_logger.info('Тестовый запуск логирования')
+    client_logger.warning('Тестовый запуск логирования')
 
-# проверяем
-client_logger.debug('Тестовый запуск логирования')
-client_logger.critical('Тестовый запуск логирования')
-'''
+    # меняем уровень логирования
+    client_logger.setLevel(logging.WARNING)
+
+    # проверяем
+    client_logger.debug('Тестовый запуск логирования')
+    client_logger.critical('Тестовый запуск логирования')
+

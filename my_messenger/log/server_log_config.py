@@ -25,15 +25,15 @@ server_logger = logging.getLogger('server.main')
 server_logger.addHandler(time_rotating_handler)
 server_logger.setLevel(logging.DEBUG)
 
-'''
-# проверяем
-server_logger.info('Тестовый запуск логирования')
-server_logger.warning('Тестовый запуск логирования')
+if __name__ == '__main__':
+    # проверяем
+    server_logger.info('Тестовый запуск логирования')
+    server_logger.warning('Тестовый запуск логирования')
 
-# меняем уровень логирования
-server_logger.setLevel(logging.WARNING)
+    # меняем уровень логирования
+    server_logger.setLevel(logging.WARNING)
 
-# проверяем
-server_logger.debug('Тестовый запуск логирования')
-server_logger.critical('Тестовый запуск логирования')
-'''
+    # проверяем
+    server_logger.debug('Тестовый запуск логирования')
+    server_logger.critical('Тестовый запуск логирования')
+
