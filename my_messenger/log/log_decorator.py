@@ -1,5 +1,13 @@
+import inspect
+import sys
+import traceback
 from functools import wraps
 import logging
+
+# if sys.argv[0].find('client') == -1:
+#     LOGGER = logging.getLogger('server')
+# else:
+#     LOGGER = logging.getLogger('client')
 
 
 def check_logging_level(logging_level):
@@ -31,7 +39,9 @@ def log():
     def decorator(func):
         @wraps(func)
         def decorated(*args, **kwargs):
-            get_decorator_logger().info('Функция {} вызвана из функции main'.format(func.__name__))
+            get_decorator_logger().info(
+                f'Функция {func.__name__} вызвана из функции {traceback.format_stack()[0].strip().split()[-1]}.'
+            )
             res = func(*args, **kwargs)
             return res
 
@@ -49,9 +59,27 @@ class Log():
         @wraps(func)
         def decorated(*args, **kwargs):
             print(check_logging_level(self.logging_level))
-            get_decorator_logger().info('Функция {} вызвана из функции main'.format(func.__name__))
+            get_decorator_logger().info(
+                f'Функция {func.__name__} вызвана из функции {traceback.format_stack()[0].strip().split()[-1]}.'
+            )
             # Декорированная функция
             res = func(*args, **kwargs)
             return res
 
         return decorated
+
+
+# class LogNew():
+#     def __call__(self, func):
+#         @wraps(func)
+#         def decorated(*args, **kwargs):
+#             get_decorator_logger().debug(f'Функция {func.__name__}. '
+#                                          f'Параметры: {args}, {kwargs}. '
+#                                          f'Модуль: {func.__module__}. '
+#                                          f'Вызов из функции {traceback.format_stack()[0].strip().split()[-1]}. \n'
+#                                          f'Вызов из функции {inspect.stack()[1][3]}')
+#             # Декорированная функция
+#             res = func(*args, **kwargs)
+#             return res
+#
+#         return decorated
