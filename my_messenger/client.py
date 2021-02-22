@@ -61,28 +61,36 @@ def main():
         client_logger.critical('Порт должен быть указан в пределах от 1024 до 65535')
         sys.exit(1)
 
-    # клиент создаёт сокет
-    s = socket(AF_INET, SOCK_STREAM)
+    # При использовании оператора with сокет будет автоматически закрыт
+    with socket(AF_INET, SOCK_STREAM) as sock: # Создать сокет TCP
+        # устанавливает соединение
+        sock.connect((server_address, server_port))
 
-    # устанавливает соединение
-    s.connect((server_address, server_port))
+        while True:
+            message = input("Введите сообщение (для выхода введите 'exit'): ")
+            if message == 'exit':
+                break
+            sock.send(message.encode('utf-8'))
+            data = sock.recv(1024).decode('utf-8')
+            print('Ответ: ', data)
 
-    # формирует и отправляет сообщение серверу;
-    presence_message = create_presence_message(CONFIGS)
-    send_message(s, presence_message, CONFIGS)
 
-    # получает ответ сервера и проверяет сообщение сервера
-    try:
-        response = get_message(s, CONFIGS)
-        checked_response = check_response(response)
-        print(f'Ответ от сервера: {checked_response}')
-        client_logger.info(f'Ответ от сервера: {checked_response}')
-    except (ValueError, json.JSONDecodeError):
-        # print('Ошибка декорирования сообщения')
-        client_logger.error('Ошибка декорирования сообщения')
-
-    # закрывает соединение
-    s.close()
+        # # формирует и отправляет сообщение серверу;
+        # presence_message = create_presence_message(CONFIGS)
+        # send_message(sock, presence_message, CONFIGS)
+        #
+        # # получает ответ сервера и проверяет сообщение сервера
+        # try:
+        #     response = get_message(s, CONFIGS)
+        #     checked_response = check_response(response)
+        #     print(f'Ответ от сервера: {checked_response}')
+        #     client_logger.info(f'Ответ от сервера: {checked_response}')
+        # except (ValueError, json.JSONDecodeError):
+        #     # print('Ошибка декорирования сообщения')
+        #     client_logger.error('Ошибка декорирования сообщения')
+        #
+        # # закрывает соединение
+        # s.close()
 
 
 if __name__ == '__main__':

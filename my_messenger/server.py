@@ -1,5 +1,6 @@
 import argparse
 import json
+import select
 import sys
 from socket import socket, AF_INET, SOCK_STREAM
 from common.utils import get_configs, get_message, send_message
@@ -7,6 +8,37 @@ from log.server_log_config import server_logger
 from log.log_decorator import log
 
 CONFIGS = get_configs()
+
+
+def read_requests(r_clients, all_clients):
+    # Чтение запросов из списка клиентов
+    responses = {}  # Словарь ответов сервера вида {сокет: запрос}
+
+    for sock in r_clients:
+        try:
+            data = sock.recv(1024).decode('utf-8')
+            responses[sock] = data
+        except:
+            print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+            all_clients.remove(sock)
+
+    return responses
+
+
+def write_responses(requests, w_clients, all_clients):
+    # Эхо-ответ сервера клиентам, от которых были запросы
+
+    for sock in w_clients:
+        for _, request in requests.items():
+            try:
+                # Подготовить и отправить ответ сервера
+                resp = request.encode('utf-8')
+                # Эхо-ответ сделаем чуть непохожим на оригинал
+                sock.send(resp.upper())
+            except:  # Сокет недоступен, клиент отключился
+                print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                sock.close()
+                all_clients.remove(sock)
 
 
 @log()
@@ -37,6 +69,7 @@ args = parser.parse_args()
 
 
 def main():
+    clients = []
     # проверка параметров вызова ip-адреса и порта из командной строки
     try:
         if '-a' or '--addr' in sys.argv:
@@ -70,22 +103,43 @@ def main():
     s.bind((listen_address, listen_port))
     # готов принимать соединения
     s.listen(CONFIGS.get('MAX_CONNECTIONS'))
+    # Таймаут для операций с сокетом (1 секунда)
+    s.settimeout(1)
 
     while True:
-        # принимает запрос на установку соединения
-        client, addr = s.accept()
-        # принимает сообщение клиента и проверяет его; при успешной проверке, отсылает ответ 200;
         try:
-            message = get_message(client, CONFIGS)
-            print(f'Сообщение: {message}, было отправлено клиентом: {addr}')
-            server_logger.debug(f'получено сообщение {message} от клиента {addr}')
-            response = check_message(message)
-            send_message(client, response, CONFIGS)
-            client.close()
-        except (ValueError, json.JSONDecodeError):
-            # print('Принято некорректное сообщение от клиента')
-            server_logger.error('Принято некорректное сообщение от клиента')
-            client.close()
+            # принимает запрос на установку соединения
+            client, addr = s.accept()
+        except OSError as e:
+            pass  # timeout вышел
+        else:
+            print(f'Получен запрос на соединение от {str(addr)}')
+            clients.append(client)
+        finally:
+            r_list = []
+            w_list = []
+            try:
+                r_list, w_list, e_list = select.select(clients, clients, [], 10)
+            except:
+                pass  # Ничего не делать, если какой-то клиент отключился
+
+            requests = read_requests(r_list, clients)  # Сохраним запросы клиентов
+            if requests:
+                print(requests)
+                write_responses(requests, w_list, clients)  # Выполним отправку ответов клиентам
+
+            # принимает сообщение клиента и проверяет его; при успешной проверке, отсылает ответ 200;
+            # try:
+            #     message = get_message(client, CONFIGS)
+            #     print(f'Сообщение: {message}, было отправлено клиентом: {addr}')
+            #     server_logger.debug(f'получено сообщение {message} от клиента {addr}')
+            #     response = check_message(message)
+            #     send_message(client, response, CONFIGS)
+            #     client.close()
+            # except (ValueError, json.JSONDecodeError):
+            #     # print('Принято некорректное сообщение от клиента')
+            #     server_logger.error('Принято некорректное сообщение от клиента')
+            #     client.close()
 
 
 if __name__ == '__main__':
