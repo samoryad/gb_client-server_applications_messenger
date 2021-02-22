@@ -10,7 +10,7 @@ from log.log_decorator import Log
 CONFIGS = get_configs()
 
 
-@Log('DEBUG')
+@Log()
 # функция формирует presence-сообщение
 def create_presence_message(CONFIGS):
     message = {
@@ -25,7 +25,7 @@ def create_presence_message(CONFIGS):
     return message
 
 
-@Log('DEBUG')
+@Log()
 # функция проверки ответа сервера
 def check_response(message):
     if CONFIGS.get('RESPONSE') in message:
@@ -45,7 +45,6 @@ def main():
                         help='server ip address')
     parser.add_argument('port', type=int, nargs='?', default=CONFIGS.get('DEFAULT_PORT'), help='port')
     args = parser.parse_args()
-    print(args)
 
     # проверка введённых параметров из командной строки вызова клиента
     try:
@@ -76,7 +75,7 @@ def main():
     try:
         response = get_message(s, CONFIGS)
         checked_response = check_response(response)
-        # print(f'Ответ от сервера: {checked_response}')
+        print(f'Ответ от сервера: {checked_response}')
         client_logger.info(f'Ответ от сервера: {checked_response}')
     except (ValueError, json.JSONDecodeError):
         # print('Ошибка декорирования сообщения')

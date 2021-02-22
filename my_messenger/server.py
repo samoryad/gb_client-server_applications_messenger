@@ -34,7 +34,6 @@ parser = argparse.ArgumentParser(description='command line server parameters')
 parser.add_argument('-a', '--addr', type=str, default='', help='ip address')
 parser.add_argument('-p', '--port', type=int, default=CONFIGS.get('DEFAULT_PORT'), help='tcp-port')
 args = parser.parse_args()
-print(args)
 
 
 def main():
