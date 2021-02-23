@@ -73,7 +73,7 @@ def main():
     # готов принимать соединения
     s.listen(CONFIGS.get('MAX_CONNECTIONS'))
     # Таймаут для операций с сокетом (1 секунда)
-    s.settimeout(0.2)
+    s.settimeout(0.5)
 
     while True:
         try:
@@ -92,8 +92,6 @@ def main():
             except:
                 pass  # Ничего не делать, если какой-то клиент отключился
 
-            print(r_list)
-            print(w_list)
             requests = read_requests(r_list, clients, CONFIGS)  # Сохраним запросы клиентов
             if requests:
                 print(requests)

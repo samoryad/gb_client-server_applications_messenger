@@ -69,18 +69,18 @@ def main():
     with socket(AF_INET, SOCK_STREAM) as sock:  # Создать сокет TCP
         # устанавливает соединение
         sock.connect((server_address, server_port))
-
-        while True:
-            if 'send' in sys.argv:
-                print('клиент в режиме отправки сообщения')
+        if 'send' in sys.argv:
+            print('клиент в режиме отправки сообщения')
+            while True:
                 message_to_send = input("Введите сообщение (для выхода - 'q'): ")
                 if message_to_send == 'q':
                     break
                 sock.send(message_to_send.encode(CONFIGS.get('ENCODING')))
                 data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
                 print('Ответ: ', data)
-            else:
-                print('клиент в режиме слушателя')
+        else:
+            print('клиент в режиме слушателя')
+            while True:
                 data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
                 if data:
                     responses.append(data)
