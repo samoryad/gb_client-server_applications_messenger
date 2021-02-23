@@ -38,13 +38,17 @@ def check_response(message):
 
 
 def main():
+    responses = []
     # global CONFIGS
     # параметры командной строки скрипта client.py <addr> [<port>]:
     parser = argparse.ArgumentParser(description='command line client parameters')
     parser.add_argument('addr', type=str, nargs='?', default=CONFIGS.get('DEFAULT_IP_ADDRESS'),
                         help='server ip address')
     parser.add_argument('port', type=int, nargs='?', default=CONFIGS.get('DEFAULT_PORT'), help='port')
+    parser.add_argument('-c', '--client', type=str, default=CONFIGS.get('DEFAULT_CLIENT_MODE'),
+                        help='client mode - "send" or "listen"(default)')
     args = parser.parse_args()
+    print(args)
 
     # проверка введённых параметров из командной строки вызова клиента
     try:
@@ -62,18 +66,25 @@ def main():
         sys.exit(1)
 
     # При использовании оператора with сокет будет автоматически закрыт
-    with socket(AF_INET, SOCK_STREAM) as sock: # Создать сокет TCP
+    with socket(AF_INET, SOCK_STREAM) as sock:  # Создать сокет TCP
         # устанавливает соединение
         sock.connect((server_address, server_port))
 
         while True:
-            message = input("Введите сообщение (для выхода введите 'exit'): ")
-            if message == 'exit':
-                break
-            sock.send(message.encode('utf-8'))
-            data = sock.recv(1024).decode('utf-8')
-            print('Ответ: ', data)
-
+            if 'send' in sys.argv:
+                print('клиент в режиме отправки сообщения')
+                message_to_send = input("Введите сообщение (для выхода - 'q'): ")
+                if message_to_send == 'q':
+                    break
+                sock.send(message_to_send.encode(CONFIGS.get('ENCODING')))
+                data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
+                print('Ответ: ', data)
+            else:
+                print('клиент в режиме слушателя')
+                data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
+                if data:
+                    responses.append(data)
+                    print('Ответ: ', data)
 
         # # формирует и отправляет сообщение серверу;
         # presence_message = create_presence_message(CONFIGS)

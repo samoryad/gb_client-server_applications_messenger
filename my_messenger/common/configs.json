@@ -11,5 +11,6 @@
   "PRESENCE":  "presence",
   "RESPONSE":  "response",
   "ERROR": "error",
-  "ALERT": "alert"
+  "ALERT": "alert",
+  "DEFAULT_CLIENT_MODE": "listen"
 }
