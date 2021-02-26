@@ -30,3 +30,36 @@ def get_configs():
     with open('common/configs.json') as configs_file:
         CONFIGS = json.load(configs_file)
         return CONFIGS
+
+
+def read_requests(r_clients, all_clients, CONFIGS):
+    # Чтение запросов из списка клиентов
+    responses = {}  # Словарь ответов сервера вида {сокет: запрос}
+
+    for sock in r_clients:
+        print(sock)
+        print(r_clients)
+        try:
+            data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
+            responses[sock] = data
+        except:
+            print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
+            all_clients.remove(sock)
+
+    return responses
+
+
+def write_responses(requests, w_clients, all_clients, CONFIGS):
+    # Эхо-ответ сервера клиентам, от которых были запросы
+
+    for sock in w_clients:
+        for _, request in requests.items():
+            try:
+                # Подготовить и отправить ответ сервера
+                resp = request.encode(CONFIGS.get('ENCODING'))
+                # Эхо-ответ сделаем чуть непохожим на оригинал
+                sock.send(resp.upper())
+            except:  # Сокет недоступен, клиент отключился
+                print(f'Клиент {sock.fileno()} {sock.getpeername()} отключился')
+                sock.close()
+                all_clients.remove(sock)
