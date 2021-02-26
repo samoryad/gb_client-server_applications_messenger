@@ -7,6 +7,7 @@ from common.utils import get_configs, get_message, send_message
 from log.client_log_config import client_logger
 from log.log_decorator import Log
 
+
 CONFIGS = get_configs()
 
 
@@ -35,6 +36,32 @@ def check_response(message):
         client_logger.error('произошла ошибка ответа сервера')
         return f'400: {message[CONFIGS.get("ERROR")]}'
     raise ValueError
+
+
+def create_user_message(sock, CONFIGS, account_name='Guest'):
+    message = input('Введите сообщение для отправки (для завершения работы - "q"): ')
+    if message == 'q':
+        sock.close()
+        client_logger.info('Завершение работы по команде пользователя')
+        print('Спасибо за использование нашего сервиса')
+        sys.exit(0)
+    message_dict = {
+        CONFIGS['ACTION']: CONFIGS['MESSAGE'],
+        CONFIGS['TIME']: time.ctime(time.time()),
+        CONFIGS['ACCOUNT_NAME']: account_name,
+        CONFIGS['MESSAGE_TEXT']: message
+    }
+    client_logger.debug(f'Сформирован словарь сообщения: {message_dict}')
+    return message_dict
+
+
+def handle_server_message(message, CONFIG):
+    if CONFIG['ACTION'] in message and message[CONFIG['ACTION']] == CONFIG['MESSAGE'] and CONFIG['SENDER'] in message and CONFIG['MESSAGE_TEXT'] in message:
+        print(f'Получено сообщение от пользователя' f'{message[CONFIG["SENDER"]]}:\n{message[CONFIG["MESSAGE_TEXT"]]}')
+        client_logger.info(f'Получено сообщение от пользователя'
+                           f'{message[CONFIG["SENDER"]]}:\n{message[CONFIG["MESSAGE_TEXT"]]}')
+    else:
+        client_logger.error(f'Получено некорректное сообщение с сервера: {message}')
 
 
 def main():
@@ -72,21 +99,34 @@ def main():
         if 'send' in sys.argv:
             print('клиент в режиме отправки сообщения')
             while True:
-                message_to_send = input("Введите сообщение (для выхода - 'q'): ")
-                if message_to_send == 'q':
-                    break
-                sock.send(message_to_send.encode(CONFIGS.get('ENCODING')))
-                data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
-                print('Ответ: ', data)
+                try:
+                    # формируем и отправляем сообщение (create_user_message - по спецификации)
+                    send_message(sock, create_user_message(sock, CONFIGS, 'Samoryad'), CONFIGS)
+
+                    # Ловим сообщение от сервера и выводим на экран
+                    # data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
+                    # print('Ответ: ', data)
+
+                    # ловим сообщение от сервера и проверяем
+                    response = get_message(sock, CONFIGS)
+                    print(response)
+                    checked_response = check_response(response)
+                    print(f'Ответ от сервера: {checked_response}')
+                except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
+                    client_logger.error(f'Соединение с сервером {server_address} было потеряно.')
         else:
             print('клиент в режиме слушателя')
             while True:
-                data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
-                if data:
-                    responses.append(data)
-                    print('Ответ: ', data)
+                try:
+                    data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
+                    if data:
+                        responses.append(data)
+                        print('Ответ: ', data)
+                except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
+                    client_logger.error(f'Соединение с сервером {server_address} было потеряно.')
 
-        # # формирует и отправляет сообщение серверу;
+        # пока оставил от урока 6
+        # формирует и отправляет сообщение серверу;
         # presence_message = create_presence_message(CONFIGS)
         # send_message(sock, presence_message, CONFIGS)
         #

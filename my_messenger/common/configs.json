@@ -12,5 +12,7 @@
   "RESPONSE":  "response",
   "ERROR": "error",
   "ALERT": "alert",
-  "DEFAULT_CLIENT_MODE": "listen"
+  "DEFAULT_CLIENT_MODE": "listen",
+  "MESSAGE": "message",
+  "MESSAGE_TEXT": "message_text"
 }
