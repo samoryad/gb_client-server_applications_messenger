@@ -65,7 +65,6 @@ def handle_server_message(message, CONFIG):
 
 
 def main():
-    responses = []
     # global CONFIGS
     # параметры командной строки скрипта client.py <addr> [<port>]:
     parser = argparse.ArgumentParser(description='command line client parameters')
@@ -92,6 +91,7 @@ def main():
         client_logger.critical('Порт должен быть указан в пределах от 1024 до 65535')
         sys.exit(1)
 
+    responses = []
     # При использовании оператора with сокет будет автоматически закрыт
     with socket(AF_INET, SOCK_STREAM) as sock:  # Создать сокет TCP
         # устанавливает соединение
@@ -120,7 +120,7 @@ def main():
                 try:
                     data = sock.recv(CONFIGS.get('MAX_PACKAGE_LENGTH')).decode(CONFIGS.get('ENCODING'))
                     if data:
-                        responses.append(data)
+                        # responses.append(data)
                         print('Ответ: ', data)
                 except (ConnectionResetError, ConnectionError, ConnectionAbortedError):
                     client_logger.error(f'Соединение с сервером {server_address} было потеряно.')

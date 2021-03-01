@@ -1,10 +1,8 @@
 import argparse
-import json
 import select
 import sys
-import time
 from socket import socket, AF_INET, SOCK_STREAM
-from common.utils import get_configs, get_message, send_message, read_requests, write_responses
+from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
 from log.log_decorator import log
 
@@ -88,13 +86,13 @@ def main():
         sys.exit(1)
 
     # сервер создаёт сокет
-    s = socket(AF_INET, SOCK_STREAM)
+    sock = socket(AF_INET, SOCK_STREAM)
     # привязывает сокет к IP-адресу и порту машины
-    s.bind((listen_address, listen_port))
+    sock.bind((listen_address, listen_port))
     # готов принимать соединения
-    s.listen(CONFIGS.get('MAX_CONNECTIONS'))
+    sock.listen(CONFIGS.get('MAX_CONNECTIONS'))
     # Таймаут для операций с сокетом (1 секунда)
-    s.settimeout(0.5)
+    sock.settimeout(0.5)
 
     clients = []
     messages = []
@@ -102,7 +100,7 @@ def main():
     while True:
         try:
             # принимает запрос на установку соединения
-            client, addr = s.accept()
+            client, addr = sock.accept()
         except OSError as e:
             pass  # timeout вышел
         else:
@@ -115,23 +113,36 @@ def main():
             if clients:
                 r_list, w_list, e_list = select.select(clients, clients, [], 2)
         except OSError:
-            pass  # Ничего не делать, если какой-то клиент отключился
+            # Ничего не делать, если какой-то клиент отключился
+            pass
+
+        # проверяем "пишущих" клиентов
         if r_list:
             for client_with_message in r_list:
+                # print(f' r-list --- {r_list}\n')
+                # print(f' client_with_message --- {client_with_message}\n')
+                # ловим от них сообщение и проверяем его на корректность, добавляем в список ответов (200 или 400)
                 try:
                     check_message_from_chat_client(get_message(client_with_message, CONFIGS), messages, CONFIGS)
                 except:
                     server_logger.info(f'Клиент {client_with_message.getpeername()} отключился от сервера.')
                     clients.remove(client_with_message)
+
+        # если есть сообщения в списке ответов после проверки (200 или 400) и есть слушающие клиенты
         if messages and w_list:
+            # print(f' w_list --- {w_list}\n')
+            # print(f' messages --- {messages}\n')
+            # формируем ответное сообщение
             message = {
                 CONFIGS.get('RESPONSE'): 200,
                 CONFIGS.get('ALERT'): messages[0]['alert'],
             }
-
-            # print(messages)
+            # удаляем сообщение из списка ответов после проверки (200 или 400)
             del messages[0]
+
+            # отправляем ждущим ответа клиентам сформированное сообщение
             for waiting_client in w_list:
+                # print(f' waiting_client --- {waiting_client}\n')
                 try:
                     send_message(waiting_client, message, CONFIGS)
                 except:
