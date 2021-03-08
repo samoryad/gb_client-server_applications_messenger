@@ -1,6 +1,7 @@
 import argparse
 import select
 import sys
+import time
 from socket import socket, AF_INET, SOCK_STREAM
 from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
@@ -11,18 +12,18 @@ CONFIGS = get_configs()
 
 @log()
 # функция проверки сообщения клиента
-def check_message(message):
+def check_presence_message(message, CONFIGS):
     if CONFIGS.get('ACTION') in message \
             and message[CONFIGS.get('ACTION')] == CONFIGS.get('PRESENCE') \
             and CONFIGS.get('TIME') in message \
             and CONFIGS.get('USER') in message \
             and message[CONFIGS.get('USER')][CONFIGS.get("ACCOUNT_NAME")] == 'Samoryad':
-        server_logger.info('сообщение клиента успешно проверено. привет, клиент')
+        server_logger.info('presence сообщение клиента успешно проверено. привет, клиент')
         return {
             CONFIGS.get('RESPONSE'): 200,
             CONFIGS.get('ALERT'): 'Привет, клиент!'
         }
-    server_logger.error('сообщение от клиента некорректно')
+    server_logger.error('presence сообщение от клиента некорректно')
     return {
         CONFIGS.get('RESPONSE'): 400,
         CONFIGS.get('ERROR'): 'Bad request'
@@ -31,23 +32,32 @@ def check_message(message):
 
 @log()
 # функция проверки сообщения клиента
-def check_message_from_chat_client(message, messages_list, CONFIGS):
+def check_message_from_chat(message, CONFIGS):
+    server_logger.debug(f'Обработка сообщения от клиента {message[CONFIGS.get("FROM_USER")]}: {message}')
     if CONFIGS.get('ACTION') in message \
             and message[CONFIGS.get('ACTION')] == CONFIGS.get('MESSAGE') \
             and CONFIGS.get('TIME') in message \
-            and CONFIGS.get('ACCOUNT_NAME') in message \
-            and message[CONFIGS.get('ACCOUNT_NAME')] == 'Samoryad':
-        server_logger.info('сообщение клиента успешно проверено. привет, клиент')
-        messages_list.append({
+            and CONFIGS.get('TO_USER') in message \
+            and message[CONFIGS.get('FROM_USER')] == 'Samoryad':
+        if message[CONFIGS.get('TO_USER')] == '#':
+            server_logger.info(f'сообщение для всех от клиента {message[CONFIGS.get("FROM_USER")]} успешно проверено')
+        else:
+            server_logger.info(f'личное сообщение от клиента {message[CONFIGS.get("FROM_USER")]} '
+                               f'для пользователя {message[CONFIGS.get("TO_USER")]} успешно проверено')
+        return {
             CONFIGS.get('RESPONSE'): 200,
-            CONFIGS.get('ALERT'): message[CONFIGS.get('MESSAGE_TEXT')]
-        })
+            CONFIGS.get('TO_USER'): message[CONFIGS.get('TO_USER')],
+            CONFIGS['FROM_USER']: message[CONFIGS.get('FROM_USER')],
+            CONFIGS.get('MESSAGE'): message[CONFIGS.get('MESSAGE')]
+        }
+    elif CONFIGS.get('ACTION') in message and message[CONFIGS.get('ACTION')] == 'quit':
+        return {CONFIGS.get('ACTION'): 'quit'}
     else:
-        server_logger.error('сообщение от клиента некорректно')
-        messages_list.append({
+        server_logger.error('сообщение из чата клиента некорректно')
+        return {
             CONFIGS.get('RESPONSE'): 400,
             CONFIGS.get('ERROR'): 'Bad request'
-        })
+        }
 
 
 # параметры командной строки скрипта server.py -p <port>, -a <addr>:
@@ -105,6 +115,8 @@ def main():
             pass  # timeout вышел
         else:
             server_logger.info(f'Установлено соединение с: {str(addr)}')
+            response = check_presence_message(get_message(client, CONFIGS), CONFIGS)
+            send_message(client, response, CONFIGS)
             clients.append(client)
 
         r_list = []
@@ -116,28 +128,34 @@ def main():
             # Ничего не делать, если какой-то клиент отключился
             pass
 
-        # проверяем "пишущих" клиентов
+        # проверяем список клиентов, из которых нужно что-то прочитать
         if r_list:
             for client_with_message in r_list:
-                # print(f' r-list --- {r_list}\n')
-                # print(f' client_with_message --- {client_with_message}\n')
-                # ловим от них сообщение и проверяем его на корректность, добавляем в список ответов (200 или 400)
+                # ловим от них сообщение и проверяем его на корректность и вносим в список
+                # сообщений messages (200 или 400)
                 try:
-                    check_message_from_chat_client(get_message(client_with_message, CONFIGS), messages, CONFIGS)
+                    answer = check_message_from_chat(get_message(client_with_message, CONFIGS), CONFIGS)
+                    messages.append(answer)
+                    # print(messages)
                 except:
-                    server_logger.info(f'Клиент {client_with_message.getpeername()} отключился от сервера.')
+                    server_logger.info(f'Клиент {client_with_message.getpeername()} отключился от сервера - r_list.')
                     clients.remove(client_with_message)
 
         # если есть сообщения в списке ответов после проверки (200 или 400) и есть слушающие клиенты
         if messages and w_list:
             # print(f' w_list --- {w_list}\n')
             # print(f' messages --- {messages}\n')
-            # формируем ответное сообщение
+
+            # то формируем ответное сообщение
             message = {
-                CONFIGS.get('RESPONSE'): 200,
-                CONFIGS.get('ALERT'): messages[0]['alert'],
+                CONFIGS['ACTION']: CONFIGS['MESSAGE'],
+                CONFIGS['TIME']: time.ctime(time.time()),
+                CONFIGS['TO_USER']: messages[0].get('to'),
+                CONFIGS['FROM_USER']: messages[0].get('from'),
+                CONFIGS['MESSAGE']: messages[0].get('message')
             }
-            # удаляем сообщение из списка ответов после проверки (200 или 400)
+            # print(message)
+            # удаляем сообщение из списка ответов после проверки
             del messages[0]
 
             # отправляем ждущим ответа клиентам сформированное сообщение
@@ -154,20 +172,6 @@ def main():
         # if requests:
         #     print(requests)
         #     write_responses(requests, w_list, clients, CONFIGS)  # Выполним отправку ответов клиентам
-
-        # пока оставил от урока 6
-        # принимает сообщение клиента и проверяет его; при успешной проверке, отсылает ответ 200;
-        # try:
-        #     message = get_message(client, CONFIGS)
-        #     print(f'Сообщение: {message}, было отправлено клиентом: {addr}')
-        #     server_logger.debug(f'получено сообщение {message} от клиента {addr}')
-        #     response = check_message(message)
-        #     send_message(client, response, CONFIGS)
-        #     client.close()
-        # except (ValueError, json.JSONDecodeError):
-        #     # print('Принято некорректное сообщение от клиента')
-        #     server_logger.error('Принято некорректное сообщение от клиента')
-        #     client.close()
 
 
 if __name__ == '__main__':
