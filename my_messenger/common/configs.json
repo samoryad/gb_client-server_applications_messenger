@@ -14,5 +14,7 @@
   "ALERT": "alert",
   "DEFAULT_CLIENT_MODE": "listen",
   "MESSAGE": "message",
-  "MESSAGE_TEXT": "message_text"
+  "MESSAGE_TEXT": "message_text",
+  "TO_USER": "to",
+  "FROM_USER": "from"
 }
