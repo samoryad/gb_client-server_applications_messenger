@@ -72,7 +72,6 @@ class Client:
         print('help - вывести подсказки по командам')
         print('q - выход из программы')
 
-
     @Log()
     def create_user_message_to_all(self, sock, CONFIGS, username='Guest'):
         message = input('Введите сообщение для отправки (для завершения работы - "q"): ')
@@ -152,6 +151,7 @@ class Client:
                 client_logger.critical(f'Потеряно соединение с сервером.')
                 break
 
+    @Log()
     def user_interactive(self, sock, username):
         print(self.help_text())
         while True:
