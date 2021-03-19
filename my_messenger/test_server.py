@@ -1,6 +1,6 @@
 import unittest
 from common.utils import get_configs
-from server import check_presence_message
+from lesson_08.server import check_presence_message
 
 
 class ServerTestCase(unittest.TestCase):

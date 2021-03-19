@@ -8,11 +8,12 @@ from common.utils import get_configs, get_message, send_message
 from log.client_log_config import client_logger
 from log.log_decorator import Log
 from errors import ReqFieldMissingError, ServerError, IncorrectDataReceivedError
+from my_messenger.metaclasses import ClientVerifier
 
 CONFIGS = get_configs()
 
 
-class Client:
+class Client(metaclass=ClientVerifier):
 
     def __init__(self):
         # параметры командной строки скрипта client.py <addr> [<port>]:
@@ -24,6 +25,7 @@ class Client:
                             help='client mode - "send" or "listen"(default)')
         args = parser.parse_args()
         # print(args)
+        super().__init__()
 
         # проверка введённых параметров из командной строки вызова клиента
         try:
@@ -71,7 +73,6 @@ class Client:
         print('to_all - отправить сообщение всем. Текст будет запрошен отдельно.')
         print('help - вывести подсказки по командам')
         print('q - выход из программы')
-
 
     @Log()
     def create_user_message_to_all(self, sock, CONFIGS, username='Guest'):
@@ -152,6 +153,7 @@ class Client:
                 client_logger.critical(f'Потеряно соединение с сервером.')
                 break
 
+    @Log()
     def user_interactive(self, sock, username):
         print(self.help_text())
         while True:
