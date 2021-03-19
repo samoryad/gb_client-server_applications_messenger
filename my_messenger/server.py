@@ -2,16 +2,19 @@ import argparse
 import select
 import sys
 import time
-from socket import socket, AF_INET, SOCK_STREAM
+import socket
 from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
 from log.log_decorator import log
+from metaclasses import ServerVerifier
+from server_descriptor import CheckPort
 
 CONFIGS = get_configs()
 
 
-class Server:
-    '''класс сервера'''
+class Server(metaclass=ServerVerifier):
+    # """класс сервера"""
+    listen_port = CheckPort()
 
     def __init__(self):
         # параметры командной строки скрипта server.py -p <port>, -a <addr>:
@@ -39,8 +42,13 @@ class Server:
                 listen_port = self.args.port
             else:
                 listen_port = CONFIGS.get('DEFAULT_PORT')
-            if not 65535 >= listen_port >= 1024:
-                raise ValueError
+            # после декоратора эти строки стали не актуальны (пока оставил)
+            # print(listen_port)
+            # if not 65535 >= listen_port >= 1024:
+            #     server_logger.critical(
+            #         f'Попытка запуска сервера с указанием неподходящего порта {listen_port}. '
+            #         f'Допустимы адреса с 1024 до 65535.')
+            #     exit(1)
         except IndexError:
             # print('После -\'p\' необходимо указать порт')
             server_logger.critical('После -\'p\' необходимо указать порт')
@@ -100,16 +108,21 @@ class Server:
                 CONFIGS.get('ERROR'): 'Bad request'
             }
 
-    def main(self):
-        listen_address, listen_port = self.arg_parser()
+    def init_socket(self):
+        listen_address, self.listen_port = self.arg_parser()
         # сервер создаёт сокет
-        sock = socket(AF_INET, SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # привязывает сокет к IP-адресу и порту машины
-        sock.bind((listen_address, listen_port))
-        # готов принимать соединения
-        sock.listen(CONFIGS.get('MAX_CONNECTIONS'))
+        sock.bind((listen_address, self.listen_port))
         # Таймаут для операций с сокетом (1 секунда)
         sock.settimeout(0.5)
+
+        self.sock = sock
+        # готов принимать соединения
+        self.sock.listen(CONFIGS.get('MAX_CONNECTIONS'))
+
+    def main(self):
+        self.init_socket()
 
         clients = []
         messages = []
@@ -117,7 +130,7 @@ class Server:
         while True:
             try:
                 # принимает запрос на установку соединения
-                client, addr = sock.accept()
+                client, addr = self.sock.accept()
             except OSError as e:
                 pass  # timeout вышел
             else:
