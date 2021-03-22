@@ -1,63 +1,74 @@
 import argparse
 import select
 import sys
+import threading
 import time
 import socket
 from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
 from log.log_decorator import log
 from metaclasses import ServerVerifier
+from my_messenger.server_storage import ServerStorage
 from server_descriptor import CheckPort
 
 CONFIGS = get_configs()
 
 
-class Server(metaclass=ServerVerifier):
+@log()
+# функция парсера аргументов командной строки
+def arg_parser():
+    # параметры командной строки скрипта server.py -p <port>, -a <addr>:
+    parser = argparse.ArgumentParser(description='command line server parameters')
+    parser.add_argument('-a', '--addr', type=str, default='', help='ip address')
+    parser.add_argument('-p', '--port', type=int, default=CONFIGS.get('DEFAULT_PORT'), help='tcp-port')
+    args = parser.parse_args()
+    # проверка параметров вызова ip-адреса и порта из командной строки
+    try:
+        if '-a' or '--addr' in sys.argv:
+            listen_address = args.addr
+        else:
+            listen_address = ''
+    except IndexError:
+        # print('После \'-a\' - необходимо указать адрес')
+        server_logger.critical('После \'-a\' - необходимо указать адрес')
+        sys.exit(1)
+
+    try:
+        if '-p' or '--port' in sys.argv:
+            listen_port = args.port
+        else:
+            listen_port = CONFIGS.get('DEFAULT_PORT')
+    except IndexError:
+        # print('После -\'p\' необходимо указать порт')
+        server_logger.critical('После -\'p\' необходимо указать порт')
+        sys.exit(1)
+    except ValueError:
+        # print('Порт должен быть указан в пределах от 1024 до 65535')
+        server_logger.critical('Порт должен быть указан в пределах от 1024 до 65535')
+
+    return listen_address, listen_port
+
+
+class Server(threading.Thread, metaclass=ServerVerifier):
     # """класс сервера"""
     listen_port = CheckPort()
 
-    def __init__(self):
-        # параметры командной строки скрипта server.py -p <port>, -a <addr>:
-        parser = argparse.ArgumentParser(description='command line server parameters')
-        parser.add_argument('-a', '--addr', type=str, default='', help='ip address')
-        parser.add_argument('-p', '--port', type=int, default=CONFIGS.get('DEFAULT_PORT'), help='tcp-port')
-        self.args = parser.parse_args()
+    def __init__(self, listen_address, listen_port, database):
+        # параментры подключения
+        self.addr = listen_address
+        self.port = listen_port
 
-    @log()
-    # метод парсера аргументов командной строки
-    def arg_parser(self):
-        # проверка параметров вызова ip-адреса и порта из командной строки
-        try:
-            if '-a' or '--addr' in sys.argv:
-                listen_address = self.args.addr
-            else:
-                listen_address = ''
-        except IndexError:
-            # print('После \'-a\' - необходимо указать адрес')
-            server_logger.critical('После \'-a\' - необходимо указать адрес')
-            sys.exit(1)
+        # база данных сервера
+        self.database = database
 
-        try:
-            if '-p' or '--port' in sys.argv:
-                listen_port = self.args.port
-            else:
-                listen_port = CONFIGS.get('DEFAULT_PORT')
-            # после декоратора эти строки стали не актуальны (пока оставил)
-            # print(listen_port)
-            # if not 65535 >= listen_port >= 1024:
-            #     server_logger.critical(
-            #         f'Попытка запуска сервера с указанием неподходящего порта {listen_port}. '
-            #         f'Допустимы адреса с 1024 до 65535.')
-            #     exit(1)
-        except IndexError:
-            # print('После -\'p\' необходимо указать порт')
-            server_logger.critical('После -\'p\' необходимо указать порт')
-            sys.exit(1)
-        except ValueError:
-            # print('Порт должен быть указан в пределах от 1024 до 65535')
-            server_logger.critical('Порт должен быть указан в пределах от 1024 до 65535')
+        # Список подключённых клиентов.
+        self.clients = []
 
-        return listen_address, listen_port
+        # Список сообщений на отправку.
+        self.messages = []
+
+        # конструктор предка
+        super().__init__()
 
     @log()
     # метод проверки сообщения клиента
@@ -109,11 +120,15 @@ class Server(metaclass=ServerVerifier):
             }
 
     def init_socket(self):
-        listen_address, self.listen_port = self.arg_parser()
+        # server_logger.info(
+        #     f'Запущен сервер, порт для подключений: {self.port} ,'
+        #     f' адрес с которого принимаются подключения: {self.addr}.'
+        #     f' Если адрес не указан, принимаются соединения с любых адресов.')
+
         # сервер создаёт сокет
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # привязывает сокет к IP-адресу и порту машины
-        sock.bind((listen_address, self.listen_port))
+        sock.bind((self.addr, self.port))
         # Таймаут для операций с сокетом (1 секунда)
         sock.settimeout(0.5)
 
@@ -121,11 +136,9 @@ class Server(metaclass=ServerVerifier):
         # готов принимать соединения
         self.sock.listen(CONFIGS.get('MAX_CONNECTIONS'))
 
-    def main(self):
+    def run(self):
+        # инициализируем сокет
         self.init_socket()
-
-        clients = []
-        messages = []
 
         while True:
             try:
@@ -137,13 +150,14 @@ class Server(metaclass=ServerVerifier):
                 server_logger.info(f'Установлено соединение с: {str(addr)}')
                 response = self.check_presence_message(get_message(client, CONFIGS), CONFIGS)
                 send_message(client, response, CONFIGS)
-                clients.append(client)
+                self.clients.append(client)
 
             r_list = []
             w_list = []
+            e_list = []
             try:
-                if clients:
-                    r_list, w_list, e_list = select.select(clients, clients, [], 2)
+                if self.clients:
+                    r_list, w_list, e_list = select.select(self.clients, self.clients, [], 2)
             except OSError:
                 # Ничего не делать, если какой-то клиент отключился
                 pass
@@ -156,15 +170,15 @@ class Server(metaclass=ServerVerifier):
                     try:
                         answer = self.check_message_from_chat(get_message(client_with_message, CONFIGS),
                                                               CONFIGS)
-                        messages.append(answer)
+                        self.messages.append(answer)
                         # print(messages)
                     except:
                         server_logger.info(
                             f'Клиент {client_with_message.getpeername()} отключился от сервера - r_list.')
-                        clients.remove(client_with_message)
+                        self.clients.remove(client_with_message)
 
             # если есть сообщения в списке ответов после проверки (200 или 400) и есть слушающие клиенты
-            if messages and w_list:
+            if self.messages and w_list:
                 # print(f' w_list --- {w_list}\n')
                 # print(f' messages --- {messages}\n')
 
@@ -172,13 +186,13 @@ class Server(metaclass=ServerVerifier):
                 message = {
                     CONFIGS['ACTION']: CONFIGS['MESSAGE'],
                     CONFIGS['TIME']: time.ctime(time.time()),
-                    CONFIGS['TO_USER']: messages[0].get('to'),
-                    CONFIGS['FROM_USER']: messages[0].get('from'),
-                    CONFIGS['MESSAGE']: messages[0].get('message')
+                    CONFIGS['TO_USER']: self.messages[0].get('to'),
+                    CONFIGS['FROM_USER']: self.messages[0].get('from'),
+                    CONFIGS['MESSAGE']: self.messages[0].get('message')
                 }
                 # print(message)
                 # удаляем сообщение из списка ответов после проверки
-                del messages[0]
+                del self.messages[0]
 
                 # отправляем ждущим ответа клиентам сформированное сообщение
                 for waiting_client in w_list:
@@ -187,10 +201,53 @@ class Server(metaclass=ServerVerifier):
                         send_message(waiting_client, message, CONFIGS)
                     except:
                         server_logger.info(f'Клиент {waiting_client.getpeername()} отключился от сервера.')
-                        clients.remove(waiting_client)
+                        self.clients.remove(waiting_client)
+
+
+def print_help():
+    print('Поддерживаемые комманды:')
+    print('all_users - список известных пользователей')
+    print('active - список подключенных пользователей')
+    print('show_history - история входов пользователя')
+    print('exit - завершение работы сервера.')
+    print('help - вывод справки по поддерживаемым командам')
+
+
+def main():
+    # грузим парамтры командной строки
+    listen_address, listen_port = arg_parser()
+
+    # создаём экземпляр базы данных
+    database = ServerStorage()
+
+    # создаём экземпляр класса сервер
+    server = Server(listen_address, listen_port, database)
+    server.daemon = True
+    server.start()
+
+    # печатаем справку
+    print_help()
+
+    # основной цикл сервера
+    while True:
+        command = input('Введите комманду: ')
+        if command == 'help':
+            print_help()
+        elif command == 'exit':
+            break
+        elif command == 'all_users':
+            for user in sorted(database.all_users_list()):
+                print(f'Пользователь {user[1]}, последний вход: {user[2]}')
+        elif command == 'active':
+            for user in sorted(database.active_users_list()):
+                print(f'Пользователь {user[1]}, подключен: {user[2]}:{user[3]}, время установки соединения: {user[4]}')
+        elif command == 'show_history':
+            for user in sorted(database.show_history()):
+                print(f'Пользователь: {user[1]} время входа: {user[2]}. Вход с: {user[3]}:{user[4]}')
+        else:
+            print('Команда не распознана.')
 
 
 if __name__ == '__main__':
     print('Стартуем сервер')
-    server = Server()
-    server.main()
+    main()
