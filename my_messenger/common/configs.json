@@ -16,5 +16,6 @@
   "MESSAGE": "message",
   "MESSAGE_TEXT": "message_text",
   "TO_USER": "to",
-  "FROM_USER": "from"
+  "FROM_USER": "from",
+  "SERVER_DATABASE_PATH": "sqlite:///server_database.db3"
 }
