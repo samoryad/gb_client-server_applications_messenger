@@ -53,8 +53,8 @@ class ServerVerifier(type):
                         if instruction.argval not in attrs_list:
                             # заполняем список атрибутами, использующимися в функциях класса
                             attrs_list.append(instruction.argval)
-        print(f'список методов класса {cls_name} (информация от метакласса) {methods_list}')
-        print(f'список атрибутов класса {cls_name} (информация от метакласса) {attrs_list}')
+        # print(f'список методов класса {cls_name} (информация от метакласса) {methods_list}')
+        # print(f'список атрибутов класса {cls_name} (информация от метакласса) {attrs_list}')
         # Если обнаружено использование недопустимого метода connect, бросаем исключение:
         if 'connect' in methods_list:
             raise TypeError('Использование метода connect недопустимо в серверном классе')
