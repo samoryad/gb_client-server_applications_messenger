@@ -208,7 +208,7 @@ def print_help():
     print('Поддерживаемые комманды:')
     print('all_users - список известных пользователей')
     print('active - список подключенных пользователей')
-    print('show_history - история входов пользователя')
+    print('login_history - история входов пользователя')
     print('exit - завершение работы сервера.')
     print('help - вывод справки по поддерживаемым командам')
 
@@ -237,13 +237,13 @@ def main():
             break
         elif command == 'all_users':
             for user in sorted(database.all_users_list()):
-                print(f'Пользователь {user[1]}, последний вход: {user[2]}')
+                print(f'Пользователь {user[0]}, последний вход: {user[1]}')
         elif command == 'active':
             for user in sorted(database.active_users_list()):
-                print(f'Пользователь {user[1]}, подключен: {user[2]}:{user[3]}, время установки соединения: {user[4]}')
-        elif command == 'show_history':
-            for user in sorted(database.show_history()):
-                print(f'Пользователь: {user[1]} время входа: {user[2]}. Вход с: {user[3]}:{user[4]}')
+                print(f'Пользователь {user[0]}, подключен: {user[1]}:{user[2]}, время установки соединения: {user[3]}')
+        elif command == 'login_history':
+            for user in sorted(database.login_history()):
+                print(f'Пользователь: {user[0]} время входа: {user[1]}. Вход с: {user[2]}:{user[3]}')
         else:
             print('Команда не распознана.')
 
