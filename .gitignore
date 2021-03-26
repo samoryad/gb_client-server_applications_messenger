@@ -149,3 +149,6 @@ dmypy.json
 /part_02_lesson_03/samples/
 /my_messenger/server_database.db3
 /part_02_lesson_04/
+/my_messenger/client_test1.db3
+/my_messenger/client_test2.db3
+/my_messenger/client_gogi.db3

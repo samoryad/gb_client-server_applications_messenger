@@ -1,25 +1,25 @@
 import json
 import os
 import sys
-
+from my_messenger.errors import IncorrectDataReceivedError, NonDictInputError
 
 # функция получения и перевода сообщения из байтов с помощью json
 def get_message(opened_socket, CONFIGS):
-    response = opened_socket.recv(CONFIGS.get('MAX_PACKAGE_LENGTH'))
-    if isinstance(response, bytes):
-        json_response = response.decode(CONFIGS.get('ENCODING'))
+    encoded_response = opened_socket.recv(CONFIGS.get('MAX_PACKAGE_LENGTH'))
+    if isinstance(encoded_response, bytes):
+        json_response = encoded_response.decode(CONFIGS.get('ENCODING'))
         response_dict = json.loads(json_response)
         if isinstance(response_dict, dict):
             return response_dict
-        raise ValueError
-    raise ValueError
+        raise IncorrectDataReceivedError
+    raise IncorrectDataReceivedError
 
 
 # функция перевода сообщения в байты с помощью json и отправки
 def send_message(opened_socket, message, CONFIGS):
     json_message = json.dumps(message)
-    response = json_message.encode(CONFIGS.get('ENCODING'))
-    opened_socket.send(response)
+    encoded_message = json_message.encode(CONFIGS.get('ENCODING'))
+    opened_socket.send(encoded_message)
 
 
 # функция получения словаря из json файла с настройками

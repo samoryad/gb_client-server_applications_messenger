@@ -76,7 +76,7 @@ class ServerStorage:
         # Создаём таблицу истории входов
         user_login_history_table = Table('login_history', self.metadata,
                                          Column('id', Integer, primary_key=True),
-                                         Column('user_name', ForeignKey('all_users.id')),  # unique=True
+                                         Column('user_name', ForeignKey('all_users.id')),
                                          Column('ip_address', String),
                                          Column('port', String),
                                          Column('last_login_time', DateTime),
@@ -279,22 +279,22 @@ if __name__ == '__main__':
     database.login_user('Ashot', '192.168.1.3', 9999)
     database.login_user('Gogi', '192.168.1.1', 7777)
     # выводим всех пользователей
-    # print(database.all_users_list())
+    print(database.all_users_list())
     # выводим активных пользователей
-    # print(database.active_users_list())
+    print(database.active_users_list())
     # разлогиниваем одного из них
-    # database.logout_user('Ashot')
+    database.logout_user('Ashot')
     # выводим всех пользователей
-    # print(database.all_users_list())
+    print(database.all_users_list())
     # выводим активных пользователей
-    # print(database.active_users_list())
+    print(database.active_users_list())
     # показываем историю
-    # print(database.login_history())
-    # print(database.login_history('Ashot'))
+    print(database.login_history())
+    print(database.login_history('Ashot'))
     # логинимся ещё одним
     database.login_user('Shakhen', '192.168.1.2', 6666)
     # показываем историю
-    # print(database.login_history())
+    print(database.login_history())
     # выводим активных пользователей
     print(database.active_users_list())
     # посылаем сообщение
