@@ -390,68 +390,6 @@ def main():
     server_app.exec_()
 
 
-    # # Загрузка файла конфигурации сервера
-    # config = configparser.ConfigParser()
-    #
-    # dir_path = os.path.dirname(os.path.realpath(__file__))
-    # config.read(f"{dir_path}/{'server.ini'}")
-    #
-    # # грузим парамтры командной строки
-    # listen_address, listen_port = arg_parser()
-    #
-    # # создаём экземпляр базы данных
-    # database = ServerStorage()
-    #
-    # # создаём экземпляр класса сервер
-    # server = Server(listen_address, listen_port, database)
-    # server.daemon = True
-    # server.start()
-    #
-    # # Создаём графическое окуружение для сервера:
-    # server_app = QApplication(sys.argv)
-    # main_window = MainWindow()
-    #
-    # # Инициализируем параметры в окна
-    # main_window.statusBar().showMessage('Server Working')
-    # main_window.active_clients_table.setModel(gui_create_model(database))
-    # main_window.active_clients_table.resizeColumnsToContents()
-    # main_window.active_clients_table.resizeRowsToContents()
-    #
-    # # Функция обновляющяя список подключённых, проверяет флаг подключения, и
-    # # если надо обновляет список
-    # def list_update():
-    #     global new_connection
-    #     if new_connection:
-    #         main_window.active_clients_table.setModel(
-    #             gui_create_model(database))
-    #         main_window.active_clients_table.resizeColumnsToContents()
-    #         main_window.active_clients_table.resizeRowsToContents()
-    #         with conflag_lock:
-    #             new_connection = False
-    #
-    # # печатаем справку
-    # print_help()
-    #
-    # # основной цикл сервера
-    # while True:
-    #     command = input('Введите комманду: ')
-    #     if command == 'help':
-    #         print_help()
-    #     elif command == 'exit':
-    #         break
-    #     elif command == 'all_users':
-    #         for user in sorted(database.all_users_list()):
-    #             print(f'Пользователь {user[0]}, последний вход: {user[1]}')
-    #     elif command == 'active':
-    #         for user in sorted(database.active_users_list()):
-    #             print(f'Пользователь {user[0]}, подключен: {user[1]}:{user[2]}, время установки соединения: {user[3]}')
-    #     elif command == 'login_history':
-    #         for user in sorted(database.login_history()):
-    #             print(f'Пользователь: {user[0]} время входа: {user[1]}. Вход с: {user[2]}:{user[3]}')
-    #     else:
-    #         print('Команда не распознана.')
-
-
 if __name__ == '__main__':
     print('Стартуем сервер')
     main()
