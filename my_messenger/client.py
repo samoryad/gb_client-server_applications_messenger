@@ -6,7 +6,7 @@ import argparse
 import socket
 from common.utils import get_configs, get_message, send_message
 from log.client_log_config import client_logger
-from log.log_decorator import Log, log
+from log.log_decorator import Log
 from errors import ReqFieldMissingError, ServerError, IncorrectDataReceivedError
 from my_messenger.client_storage import ClientDatabase
 from my_messenger.metaclasses import ClientVerifier
@@ -222,7 +222,7 @@ class ClientReader(threading.Thread, metaclass=ClientVerifier):
 
 
 # Функция генерирует запрос о присутствии клиента
-# @log
+@Log()
 def create_presence(account_name):
     presence_message = {
         CONFIGS.get('ACTION'): CONFIGS.get('PRESENCE'),
@@ -238,7 +238,7 @@ def create_presence(account_name):
 
 # Функция разбирает ответ сервера на сообщение о присутствии,
 # возращает 200 если все ОК или генерирует исключение при ошибке.
-# @Log
+@Log()
 def process_response_ans(message):
     client_logger.debug(f'Разбор приветственного сообщения от сервера: {message}')
     if CONFIGS.get('RESPONSE') in message:

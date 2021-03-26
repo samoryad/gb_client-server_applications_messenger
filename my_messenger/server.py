@@ -4,12 +4,9 @@ import os
 import select
 import sys
 import threading
-import time
 import socket
-
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox
-
 from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
 from log.log_decorator import log
@@ -165,6 +162,7 @@ class Server(threading.Thread, metaclass=ServerVerifier):
 
     # метод адресной отправки сообщения определённому клиенту. Принимает словарь сообщение, список зарегистрированых
     # пользователей и слушающие сокеты. Ничего не возвращает.
+    @log()
     def send_message_to_client(self, message, listen_sockets):
         if message[CONFIGS.get('TO_USER')] in self.client_names and self.client_names[
             message[CONFIGS.get('TO_USER')]] in listen_sockets:
@@ -292,6 +290,9 @@ def main():
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     config.read(f"{dir_path}/{'server.ini'}")
+    # print(config)
+    # print(config['SETTINGS'])
+    # print(config['SETTINGS']['Default_port'])
 
     # Загрузка параметров командной строки, если нет параметров, то задаём
     # значения по умоланию.
