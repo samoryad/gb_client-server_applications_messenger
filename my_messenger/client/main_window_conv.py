@@ -39,7 +39,7 @@ class Ui_MainWindow(object):
         self.label_history.setObjectName("label_history")
 
         self.label_new_message = QtWidgets.QLabel(self.centralwidget)
-        self.label_new_message.setGeometry(QtCore.QRect(310, 360, 171, 16))
+        self.label_new_message.setGeometry(QtCore.QRect(310, 360, 400, 16))
         self.label_new_message.setObjectName("label_new_message")
 
         self.btn_add_contact = QtWidgets.QPushButton(self.centralwidget)
