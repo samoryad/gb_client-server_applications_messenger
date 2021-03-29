@@ -1,9 +1,11 @@
+import json
 import socket
+import sys
 import time
 import threading
 from PyQt5.QtCore import pyqtSignal, QObject
-from common.utils import *
-from common.errors import ServerError
+from my_messenger.common.errors import ServerError
+from my_messenger.common.utils import get_configs, send_message, get_message
 from my_messenger.log.client_log_config import client_logger
 from my_messenger.log.log_decorator import Log
 
