@@ -1,7 +1,7 @@
 import json
 import unittest
 from socket import socket, AF_INET, SOCK_STREAM
-from common.utils import get_configs, send_message, get_message
+from my_messenger.common.utils import get_configs, send_message, get_message
 
 
 class TestSocket:

@@ -1,5 +1,5 @@
 import unittest
-from common.utils import get_configs
+from my_messenger.common.utils import get_configs
 from lesson_08.server import check_presence_message
 
 

@@ -1,7 +1,7 @@
 import unittest
 
-from common.utils import get_configs
-from client import Client
+from my_messenger.common.utils import get_configs
+from my_messenger.client import Client
 
 
 class ClientTestCase(unittest.TestCase):

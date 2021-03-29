@@ -1,7 +1,8 @@
 import json
 import os
 import sys
-from my_messenger.errors import IncorrectDataReceivedError, NonDictInputError
+from my_messenger.common.errors import IncorrectDataReceivedError
+
 
 # функция получения и перевода сообщения из байтов с помощью json
 def get_message(opened_socket, CONFIGS):
