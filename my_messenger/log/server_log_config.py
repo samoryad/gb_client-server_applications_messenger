@@ -8,8 +8,8 @@ formatter = logging.Formatter(_log_format)
 
 # Создаем файловый обработчик логирования (можно задать кодировку)
 # Журналирование должно производиться в лог-файл
-file_handler = logging.FileHandler("log/server/server.main.log", encoding='utf-8')
-file_handler.setFormatter(formatter)
+# file_handler = logging.FileHandler("log/server/server.main.log", encoding='utf-8')
+# file_handler.setFormatter(formatter)
 
 # На стороне сервера необходимо настроить ежедневную ротацию лог-файлов.
 time_rotating_handler = TimedRotatingFileHandler("log/server/server.main.log", when='d', interval=1,
