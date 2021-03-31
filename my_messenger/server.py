@@ -97,10 +97,11 @@ class Server(threading.Thread, metaclass=ServerVerifier):
 
         self.sock = sock
         # готов принимать соединения
-        self.sock.listen(CONFIGS.get('MAX_CONNECTIONS'))
+        self.sock.listen()
 
     def run(self):
         # инициализируем сокет
+        global new_connection
         self.init_socket()
 
         # основной цикл программы сервера
@@ -113,8 +114,6 @@ class Server(threading.Thread, metaclass=ServerVerifier):
                 pass  # timeout вышел
             else:
                 server_logger.info(f'Установлено соединение с: {str(addr)}')
-                # response = self.check_message_from_chat(get_message(client, CONFIGS), CONFIGS)
-                # send_message(client, response, CONFIGS)
                 self.clients.append(client)
 
             recv_data_lst = []
@@ -130,13 +129,10 @@ class Server(threading.Thread, metaclass=ServerVerifier):
             # проверяем список клиентов, от которых нужно что-то прочитать
             if recv_data_lst:
                 for client_with_message in recv_data_lst:
-                    # print(f'клиент -------------- {client_with_message}')
                     # ловим от них сообщение и проверяем его на корректность и вносим в список
                     # сообщений messages (200 или 400)
                     try:
                         self.check_message_from_chat(get_message(client_with_message, CONFIGS), client_with_message, CONFIGS)
-                        # self.messages.append(answer) - надо убирать из-за нового метода проверки
-                        # print(messages)
                     except OSError:
                         # ищем клиента в словаре клиентов и удаляем его из базы подключённых
                         server_logger.info(
@@ -147,6 +143,8 @@ class Server(threading.Thread, metaclass=ServerVerifier):
                                 del self.client_names[client_name]
                                 break
                         self.clients.remove(client_with_message)
+                        with conflag_lock:
+                            new_connection = True
 
             # если есть сообщения, обрабатываем каждое.
             for message in self.messages:
@@ -158,6 +156,8 @@ class Server(threading.Thread, metaclass=ServerVerifier):
                     self.clients.remove(self.client_names[message[CONFIGS.get('TO_USER')]])
                     self.database.logout_user(message[CONFIGS.get('TO_USER')])
                     del self.client_names[message[CONFIGS.get('TO_USER')]]
+                    with conflag_lock:
+                        new_connection = True
             self.messages.clear()
 
     # метод адресной отправки сообщения определённому клиенту. Принимает словарь сообщение, список зарегистрированых
@@ -207,16 +207,24 @@ class Server(threading.Thread, metaclass=ServerVerifier):
                 self.clients.remove(client)
                 client.close()
             return
-        # {'action': 'message', 'from': 'test1', 'to': 'test2', 'time': 1616711690.8860502, 'message_text': 'gggggggggggggg'}
 
         # если это сообщение, то добавляем его в очередь сообщений. Ответ не требуется.
         elif CONFIGS.get('ACTION') in message and message[CONFIGS.get('ACTION')] == CONFIGS.get(
                 'MESSAGE') and CONFIGS.get('TO_USER') in message and CONFIGS.get('TIME') in message and CONFIGS.get(
             'FROM_USER') in message and CONFIGS.get('MESSAGE_TEXT') in message and self.client_names[
             message[CONFIGS.get('FROM_USER')]] == client:
-            self.messages.append(message)
-            self.database.process_message(
+            if message[CONFIGS.get('TO_USER')] in self.client_names:
+                self.messages.append(message)
+                self.database.process_message(
                 message[CONFIGS.get('FROM_USER')], message[CONFIGS.get('TO_USER')])
+                send_message(client, {
+                    CONFIGS.get('RESPONSE'): 200
+                }, CONFIGS)
+            else:
+                send_message(client, {
+                    CONFIGS.get('RESPONSE'): 400,
+                    CONFIGS.get('ERROR'): 'User is not registered on server.'
+                }, CONFIGS)
             return
 
         # если клиент выходит
@@ -275,24 +283,26 @@ class Server(threading.Thread, metaclass=ServerVerifier):
             return
 
 
-def print_help():
-    print('Поддерживаемые комманды:')
-    print('all_users - список известных пользователей')
-    print('active - список подключенных пользователей')
-    print('login_history - история входов пользователя')
-    print('exit - завершение работы сервера.')
-    print('help - вывод справки по поддерживаемым командам')
+# Загрузка файла конфигурации
+def config_load():
+    config = configparser.ConfigParser()
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    config.read(f"{dir_path}/{'server.ini'}")
+    # Если конфиг файл загружен правильно, запускаемся, иначе конфиг по умолчанию.
+    if 'SETTINGS' in config:
+        return config
+    else:
+        config.add_section('SETTINGS')
+        config.set('SETTINGS', 'Default_port', str(CONFIGS.get('DEFAULT_PORT')))
+        config.set('SETTINGS', 'Listen_Address', '')
+        config.set('SETTINGS', 'Database_path', '')
+        config.set('SETTINGS', 'Database_file', 'server_database.db3')
+        return config
 
 
 def main():
     # Загрузка файла конфигурации сервера
-    config = configparser.ConfigParser()
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    config.read(f"{dir_path}/{'server.ini'}")
-    # print(config)
-    # print(config['SETTINGS'])
-    # print(config['SETTINGS']['Default_port'])
+    config = config_load()
 
     # Загрузка параметров командной строки, если нет параметров, то задаём
     # значения по умоланию.
@@ -300,7 +310,7 @@ def main():
         config['SETTINGS']['Default_port'], config['SETTINGS']['Listen_Address'])
 
     # Инициализация базы данных
-    database = ServerStorage()
+    database = ServerStorage(os.path.join(config['SETTINGS']['Database_path'], config['SETTINGS']['Database_file']))
 
     # Создание экземпляра класса - сервера и его запуск:
     server = Server(listen_address, listen_port, database)
@@ -325,8 +335,7 @@ def main():
     def list_update():
         global new_connection
         if new_connection:
-            main_window.active_clients_table.setModel(
-                gui_create_model(database))
+            main_window.active_clients_table.setModel(gui_create_model(database))
             main_window.active_clients_table.resizeColumnsToContents()
             main_window.active_clients_table.resizeRowsToContents()
             with conflag_lock:

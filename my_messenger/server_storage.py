@@ -49,10 +49,10 @@ class ServerStorage:
             self.sent_messages = 0
             self.accepted_messages = 0
 
-    def __init__(self):
+    def __init__(self, path):
         # создаём движок базы данных (без логирования и с переподключением каждые 2 часа)
-        self.ENGINE = create_engine(CONFIGS.get('SERVER_DATABASE_PATH'), echo=False, pool_recycle=7200,
-                                    connect_args={'check_same_thread': False})
+        self.ENGINE = create_engine(f'sqlite:///{path}', echo=False, pool_recycle=7200,
+                                             connect_args={'check_same_thread': False})
 
         # Создаём объект MetaData
         self.metadata = MetaData()
@@ -201,10 +201,10 @@ class ServerStorage:
             return
 
         # удаляем требуемое
-        print(self.session.query(self.UsersContacts).filter(
+        self.session.query(self.UsersContacts).filter(
             self.UsersContacts.user_name == user.id,
             self.UsersContacts.contact == contact.id
-        ).delete())
+        ).delete()
         self.session.commit()
 
     # метод получения списка всех пользователей
