@@ -5,10 +5,10 @@ import os
 import select
 import threading
 import socket
-from my_messenger.common.utils import get_configs, get_message, send_message
-from my_messenger.log.log_decorator import log
-from my_messenger.log.server_log_config import server_logger
-from my_messenger.server_descriptor import CheckPort
+from common.utils import get_configs, get_message, send_message
+from log.log_decorator import log
+from log.server_log_config import server_logger
+from server_descriptor import CheckPort
 
 CONFIGS = get_configs()
 
