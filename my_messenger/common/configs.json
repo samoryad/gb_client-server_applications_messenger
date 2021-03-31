@@ -23,5 +23,8 @@
   "LIST_INFO": "data_list",
   "ADD_CONTACT": "add",
   "REMOVE_CONTACT": "remove",
-  "USERS_REQUEST": "get_users"
+  "USERS_REQUEST": "get_users",
+  "PUBLIC_KEY_REQUEST": "pubkey_need",
+  "DATA": "bin",
+  "PUBLIC_KEY": "pubkey"
 }
