@@ -41,4 +41,3 @@ if __name__ == '__main__':
     # проверяем
     server_logger.debug('Тестовый запуск логирования')
     server_logger.critical('Тестовый запуск логирования')
-

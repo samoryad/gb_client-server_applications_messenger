@@ -22,9 +22,6 @@ steam.setLevel(logging.INFO)
 log_file = logging.FileHandler(path, encoding='utf8')
 log_file.setFormatter(client_formatter)
 
-# Создание именованного логгера
-client_logger = logging.getLogger('client.main')
-
 # создаём регистратор и настраиваем его
 client_logger = logging.getLogger('client')
 client_logger.addHandler(steam)
@@ -43,4 +40,3 @@ if __name__ == '__main__':
     # проверяем
     client_logger.debug('Тестовый запуск логирования')
     client_logger.critical('Тестовый запуск логирования')
-
