@@ -1,21 +1,34 @@
 import logging
+import os
+import sys
+
+sys.path.append('../')
 
 # Сообщения лога должны иметь следующий формат: "<дата-время> <уровень_важности> <имя_модуля> <сообщение>"
 _log_format = f'%(asctime)s - %(levelname)s - %(module)s - %(message)s '
 # Создаем объект форматирования
-formatter = logging.Formatter(_log_format)
+client_formatter = logging.Formatter(_log_format)
 
-# Создаем файловый обработчик логирования (можно задать кодировку)
-# Журналирование должно производиться в лог-файл
-file_handler = logging.FileHandler("log/client/client.main.log", encoding='utf-8')
-# file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
+# Подготовка имени файла для логирования
+path = os.path.dirname(os.path.abspath(__file__))
+print(path)
+path = os.path.join(path, 'client.log')
+print(path)
+
+# создаём потоки вывода логов
+steam = logging.StreamHandler(sys.stderr)
+steam.setFormatter(client_formatter)
+steam.setLevel(logging.INFO)
+log_file = logging.FileHandler(path, encoding='utf8')
+log_file.setFormatter(client_formatter)
 
 # Создание именованного логгера
 client_logger = logging.getLogger('client.main')
 
-# Добавляем в логгер новый обработчик событий и устанавливаем уровень логирования
-client_logger.addHandler(file_handler)
+# создаём регистратор и настраиваем его
+client_logger = logging.getLogger('client')
+client_logger.addHandler(steam)
+client_logger.addHandler(log_file)
 client_logger.setLevel(logging.DEBUG)
 
 
