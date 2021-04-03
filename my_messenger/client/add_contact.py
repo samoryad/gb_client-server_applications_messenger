@@ -1,12 +1,14 @@
-import sys
 from my_messenger.log.client_log_config import client_logger
 from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton
 from PyQt5.QtCore import Qt
-sys.path.append('../')
 
 
-# Диалог выбора контакта для добавления
 class AddContactDialog(QDialog):
+    """
+    Диалог добавления пользователя в список контактов.
+    Предлагает пользователю список возможных контактов и
+    добавляет выбранный в контакты.
+    """
     def __init__(self, transport, database):
         super().__init__()
         self.transport = transport
@@ -18,7 +20,7 @@ class AddContactDialog(QDialog):
         self.setModal(True)
 
         self.selector_label = QLabel('Выберите контакт для добавления:', self)
-        self.selector_label.setFixedSize(200, 20)
+        self.selector_label.setFixedSize(210, 20)
         self.selector_label.move(10, 0)
 
         self.selector = QComboBox(self)
@@ -26,8 +28,8 @@ class AddContactDialog(QDialog):
         self.selector.move(10, 30)
 
         self.btn_refresh = QPushButton('Обновить список', self)
-        self.btn_refresh.setFixedSize(100, 30)
-        self.btn_refresh.move(60, 60)
+        self.btn_refresh.setFixedSize(130, 30)
+        self.btn_refresh.move(50, 60)
 
         self.btn_ok = QPushButton('Добавить', self)
         self.btn_ok.setFixedSize(100, 30)
@@ -45,6 +47,11 @@ class AddContactDialog(QDialog):
 
     # Заполняем список возможных контактов разницей между всеми пользователями и
     def possible_contacts_update(self):
+        """
+        Метод заполнения списка возможных контактов.
+        Создаёт список всех зарегистрированных пользователей
+        за исключением уже добавленных в контакты и самого себя.
+        """
         self.selector.clear()
         # множества всех контактов и контактов клиента
         contacts_list = set(self.database.get_contacts())
@@ -54,9 +61,11 @@ class AddContactDialog(QDialog):
         # Добавляем список возможных контактов
         self.selector.addItems(users_list - contacts_list)
 
-    # Обновлялка возможных контактов. Обновляет таблицу известных пользователей,
-    # затем содержимое предполагаемых контактов
     def update_possible_contacts(self):
+        """
+        Метод обновления списка возможных контактов. Запрашивает с сервера
+        список известных пользователей и обносляет содержимое окна.
+        """
         try:
             self.transport.user_list_update()
         except OSError:
