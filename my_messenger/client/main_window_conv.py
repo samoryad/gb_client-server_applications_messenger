@@ -18,29 +18,9 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
-        self.list_contacts = QtWidgets.QListView(self.centralwidget)
-        self.list_contacts.setGeometry(QtCore.QRect(10, 30, 281, 471))
-        self.list_contacts.setObjectName("list_contacts")
-
-        self.list_messages = QtWidgets.QListView(self.centralwidget)
-        self.list_messages.setGeometry(QtCore.QRect(310, 30, 471, 321))
-        self.list_messages.setObjectName("list_messages")
-
-        self.text_message = QtWidgets.QTextEdit(self.centralwidget)
-        self.text_message.setGeometry(QtCore.QRect(310, 380, 471, 121))
-        self.text_message.setObjectName("text_message")
-
         self.label_contacts = QtWidgets.QLabel(self.centralwidget)
         self.label_contacts.setGeometry(QtCore.QRect(10, 10, 121, 20))
         self.label_contacts.setObjectName("label_contacts")
-
-        self.label_history = QtWidgets.QLabel(self.centralwidget)
-        self.label_history.setGeometry(QtCore.QRect(310, 10, 141, 16))
-        self.label_history.setObjectName("label_history")
-
-        self.label_new_message = QtWidgets.QLabel(self.centralwidget)
-        self.label_new_message.setGeometry(QtCore.QRect(310, 360, 400, 16))
-        self.label_new_message.setObjectName("label_new_message")
 
         self.btn_add_contact = QtWidgets.QPushButton(self.centralwidget)
         self.btn_add_contact.setGeometry(QtCore.QRect(30, 520, 121, 28))
@@ -50,13 +30,34 @@ class Ui_MainWindow(object):
         self.btn_remove_contact.setGeometry(QtCore.QRect(160, 520, 111, 28))
         self.btn_remove_contact.setObjectName("btn_remove_contact")
 
-        self.btn_clear = QtWidgets.QPushButton(self.centralwidget)
-        self.btn_clear.setGeometry(QtCore.QRect(470, 520, 121, 28))
-        self.btn_clear.setObjectName("btn_clear")
+        self.label_history = QtWidgets.QLabel(self.centralwidget)
+        self.label_history.setGeometry(QtCore.QRect(310, 10, 141, 16))
+        self.label_history.setObjectName("label_history")
+
+        self.text_message = QtWidgets.QTextEdit(self.centralwidget)
+        self.text_message.setGeometry(QtCore.QRect(310, 380, 471, 121))
+        self.text_message.setObjectName("text_message")
+
+        self.label_new_message = QtWidgets.QLabel(self.centralwidget)
+        self.label_new_message.setGeometry(QtCore.QRect(310, 360, 400, 16))
+        self.label_new_message.setObjectName("label_new_message")
+
+        self.list_contacts = QtWidgets.QListView(self.centralwidget)
+        self.list_contacts.setGeometry(QtCore.QRect(10, 30, 281, 471))
+        self.list_contacts.setObjectName("list_contacts")
+
+        self.list_messages = QtWidgets.QListView(self.centralwidget)
+        self.list_messages.setGeometry(QtCore.QRect(310, 30, 471, 321))
+        self.list_messages.setObjectName("list_messages")
 
         self.btn_send = QtWidgets.QPushButton(self.centralwidget)
         self.btn_send.setGeometry(QtCore.QRect(610, 520, 161, 28))
         self.btn_send.setObjectName("btn_send")
+
+        self.btn_clear = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_clear.setGeometry(QtCore.QRect(470, 520, 121, 28))
+        self.btn_clear.setObjectName("btn_clear")
+
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -93,14 +94,14 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Чат программа"))
         self.label_contacts.setText(_translate("MainWindow", "Список контактов:"))
-        self.label_history.setText(_translate("MainWindow", "История сообщений:"))
-        self.label_new_message.setText(_translate("MainWindow", "Введите новое сообщение"))
         self.btn_add_contact.setText(_translate("MainWindow", "Добавить контакт"))
         self.btn_remove_contact.setText(_translate("MainWindow", "Удалить контакт"))
-        self.btn_clear.setText(_translate("MainWindow", "Очистить поле"))
+        self.label_history.setText(_translate("MainWindow", "История сообщений:"))
+        self.label_new_message.setText(_translate("MainWindow", "Введите новое сообщение"))
         self.btn_send.setText(_translate("MainWindow", "Отправить сообщение"))
+        self.btn_clear.setText(_translate("MainWindow", "Очистить поле"))
         self.menu.setTitle(_translate("MainWindow", "Файл"))
         self.menu_2.setTitle(_translate("MainWindow", "Контакты"))
+        self.menu_exit.setText(_translate("MainWindow", "Выход"))
         self.menu_add_contact.setText(_translate("MainWindow", "Добавить контакт"))
         self.menu_del_contact.setText(_translate("MainWindow", "Удалить контакт"))
-        self.menu_exit.setText(_translate("MainWindow", "Выход"))
