@@ -2,7 +2,7 @@
   "DEFAULT_IP_ADDRESS": "127.0.0.1",
   "DEFAULT_PORT": 7777,
   "MAX_CONNECTIONS":  5,
-  "MAX_PACKAGE_LENGTH":  1024,
+  "MAX_PACKAGE_LENGTH":  10240,
   "ENCODING":  "utf-8",
   "ACTION":  "action",
   "TIME":  "time",
@@ -14,7 +14,7 @@
   "ALERT": "alert",
   "DEFAULT_CLIENT_MODE": "listen",
   "MESSAGE": "message",
-  "MESSAGE_TEXT": "message_text",
+  "MESSAGE_TEXT": "mess_text",
   "TO_USER": "to",
   "FROM_USER": "from",
   "SERVER_DATABASE_PATH": "sqlite:///server_database.db3",
@@ -26,5 +26,6 @@
   "USERS_REQUEST": "get_users",
   "PUBLIC_KEY_REQUEST": "pubkey_need",
   "DATA": "bin",
-  "PUBLIC_KEY": "pubkey"
+  "PUBLIC_KEY": "pubkey",
+  "SERVER_CONFIG": "server.ini"
 }
