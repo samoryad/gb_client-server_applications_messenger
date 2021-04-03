@@ -123,7 +123,7 @@ class MessageProcessor(threading.Thread):
 
     # метод адресной отправки сообщения определённому клиенту. Принимает словарь сообщение, список зарегистрированых
     # пользователей и слушающие сокеты. Ничего не возвращает.
-    @log()
+    @log
     def send_message_to_client(self, message):
         '''
         Метод отправки сообщения клиенту.
@@ -148,7 +148,7 @@ class MessageProcessor(threading.Thread):
                 f'Пользователь {message[CONFIGS.get("TO_USER")]} не зарегистрирован на сервере, '
                 f'отправка сообщения невозможна.')
 
-    @log()
+    @log
     # метод проверки сообщения клиента
     def check_message_from_chat(self, message, client, CONFIGS):
         '''Метод - отбработчик поступающих сообщений.'''

@@ -9,8 +9,8 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from common.utils import get_configs, get_message, send_message
 from log.server_log_config import server_logger
-from log.log_decorator import log
 from metaclasses import ServerVerifier
+from my_messenger.common.decorators import log
 from server_gui import MainWindow, gui_create_model, HistoryWindow, create_stat_model, ConfigWindow
 from server_storage import ServerStorage
 from server_descriptor import CheckPort
@@ -23,7 +23,7 @@ new_connection = False
 conflag_lock = threading.Lock()
 
 
-@log()
+@log
 # функция парсера аргументов командной строки
 def arg_parser(default_port, default_address):
     # параметры командной строки скрипта server.py -p <port>, -a <addr>:
@@ -162,7 +162,7 @@ class Server(threading.Thread, metaclass=ServerVerifier):
 
     # метод адресной отправки сообщения определённому клиенту. Принимает словарь сообщение, список зарегистрированых
     # пользователей и слушающие сокеты. Ничего не возвращает.
-    @log()
+    @log
     def send_message_to_client(self, message, listen_sockets):
         if message[CONFIGS.get('TO_USER')] in self.client_names and self.client_names[
             message[CONFIGS.get('TO_USER')]] in listen_sockets:
@@ -178,7 +178,7 @@ class Server(threading.Thread, metaclass=ServerVerifier):
                 f'Пользователь {message[CONFIGS.get("TO_USER")]} не зарегистрирован на сервере, '
                 f'отправка сообщения невозможна.')
 
-    @log()
+    @log
     # метод проверки сообщения клиента
     def check_message_from_chat(self, message, client, CONFIGS):
         global new_connection
