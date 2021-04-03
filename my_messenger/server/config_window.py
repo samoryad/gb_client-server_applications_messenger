@@ -13,7 +13,7 @@ class ConfigWindow(QDialog):
 
     def initUI(self):
         """Настройки окна"""
-        self.setFixedSize(365, 260)
+        self.setFixedSize(390, 260)
         self.setWindowTitle('Настройки сервера')
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setModal(True)
@@ -31,7 +31,7 @@ class ConfigWindow(QDialog):
 
         # Кнопка выбора пути.
         self.db_path_select = QPushButton('Обзор...', self)
-        self.db_path_select.move(275, 28)
+        self.db_path_select.move(285, 28)
 
         # Метка с именем поля файла базы данных
         self.db_file_label = QLabel('Имя файла базы данных: ', self)
@@ -40,7 +40,7 @@ class ConfigWindow(QDialog):
 
         # Поле для ввода имени файла
         self.db_file = QLineEdit(self)
-        self.db_file.move(200, 66)
+        self.db_file.move(230, 66)
         self.db_file.setFixedSize(150, 20)
 
         # Метка с номером порта
@@ -50,13 +50,13 @@ class ConfigWindow(QDialog):
 
         # Поле для ввода номера порта
         self.port = QLineEdit(self)
-        self.port.move(200, 108)
+        self.port.move(230, 108)
         self.port.setFixedSize(150, 20)
 
         # Метка с адресом для соединений
         self.ip_label = QLabel('С какого IP принимаем соединения:', self)
         self.ip_label.move(10, 148)
-        self.ip_label.setFixedSize(180, 15)
+        self.ip_label.setFixedSize(210, 15)
 
         # Метка с напоминанием о пустом поле.
         self.ip_label_note = QLabel(
@@ -67,16 +67,16 @@ class ConfigWindow(QDialog):
 
         # Поле для ввода ip
         self.ip = QLineEdit(self)
-        self.ip.move(200, 148)
+        self.ip.move(230, 148)
         self.ip.setFixedSize(150, 20)
 
         # Кнопка сохранения настроек
         self.save_btn = QPushButton('Сохранить', self)
-        self.save_btn.move(190, 220)
+        self.save_btn.move(180, 220)
 
         # Кнапка закрытия окна
         self.close_button = QPushButton('Закрыть', self)
-        self.close_button.move(275, 220)
+        self.close_button.move(280, 220)
         self.close_button.clicked.connect(self.close)
 
         self.db_path_select.clicked.connect(self.open_file_dialog)

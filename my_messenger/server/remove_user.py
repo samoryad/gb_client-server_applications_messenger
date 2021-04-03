@@ -18,7 +18,7 @@ class DelUserDialog(QDialog):
 
         self.selector_label = QLabel(
             'Выберите пользователя для удаления:', self)
-        self.selector_label.setFixedSize(200, 20)
+        self.selector_label.setFixedSize(230, 20)
         self.selector_label.move(10, 0)
 
         self.selector = QComboBox(self)

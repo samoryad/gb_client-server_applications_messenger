@@ -11,9 +11,7 @@ client_formatter = logging.Formatter(_log_format)
 
 # Подготовка имени файла для логирования
 path = os.path.dirname(os.path.abspath(__file__))
-print(path)
 path = os.path.join(path, 'client.log')
-print(path)
 
 # создаём потоки вывода логов
 steam = logging.StreamHandler(sys.stderr)

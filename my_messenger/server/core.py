@@ -99,7 +99,7 @@ class MessageProcessor(threading.Thread):
             f'Клиент {client.getpeername()} отключился от сервера')
         for name in self.names:
             if self.names[name] == client:
-                self.database.logout_user(name)
+                self.database.user_logout(name)
                 del self.names[name]
                 break
         self.clients.remove(client)
@@ -158,7 +158,7 @@ class MessageProcessor(threading.Thread):
         if CONFIGS.get('ACTION') in message and message[CONFIGS.get('ACTION')] == CONFIGS.get(
                 'PRESENCE') and CONFIGS.get('TIME') in message and CONFIGS.get('USER') in message:
             # Если сообщение о присутствии то вызываем функцию авторизации.
-            self.autorize_user(message, client)
+            self.authorize_user(message, client)
 
         # Если это сообщение, то отправляем его получателю.
         elif CONFIGS.get('ACTION') in message and message[CONFIGS.get('ACTION')] == CONFIGS.get(
@@ -223,7 +223,7 @@ class MessageProcessor(threading.Thread):
                 'USERS_REQUEST') and CONFIGS.get('ACCOUNT_NAME') in message and self.names[
             message[CONFIGS.get('ACCOUNT_NAME')]] == client:
             response = RESPONSE_202
-            response[CONFIGS.get('LIST_INFO')] = [user[0] for user in self.database.all_users_list()]
+            response[CONFIGS.get('LIST_INFO')] = [user[0] for user in self.database.users_list()]
             try:
                 send_message(client, response, CONFIGS)
             except OSError:
@@ -258,7 +258,7 @@ class MessageProcessor(threading.Thread):
             except OSError:
                 self.remove_client(client)
 
-    def autorize_user(self, message, sock):
+    def authorize_user(self, message, sock):
         """Метод реализующий авторизцию пользователей."""
         # Если имя пользователя уже занято то возвращаем 400
         server_logger.debug(f'Start auth process for {message[CONFIGS.get("USER")]}')
@@ -318,7 +318,7 @@ class MessageProcessor(threading.Thread):
                 except OSError:
                     self.remove_client(message[CONFIGS.get('USER')][CONFIGS.get('ACCOUNT_NAME')])
                 # добавляем пользователя в список активных и если у него изменился открытый ключ сохраняем новый
-                self.database.login_user(
+                self.database.user_login(
                     message[CONFIGS.get('USER')][CONFIGS.get('ACCOUNT_NAME')],
                     client_ip,
                     client_port,
