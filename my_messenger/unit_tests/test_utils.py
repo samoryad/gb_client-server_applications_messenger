@@ -14,7 +14,8 @@ class TestSocket:
 
     def send(self, message_to_send):
         json_test_message = json.dumps(self.test_message)
-        self.encoded_message = json_test_message.encode(self.CONFIGS.get('ENCODING'))
+        self.encoded_message = json_test_message.encode(
+            self.CONFIGS.get('ENCODING'))
         self.received_message = message_to_send
 
     def recv(self, max_len):
@@ -59,12 +60,16 @@ class UtilsTestCase(unittest.TestCase):
 
         test_socket = TestSocket(test_message_from_client)
         send_message(test_socket, test_message_from_client, self.CONFIGS)
-        self.assertEqual(test_socket.encoded_message, test_socket.received_message)
+        self.assertEqual(
+            test_socket.encoded_message,
+            test_socket.received_message)
 
     def test_get_message(self):
         test_message = {"response": "200", "alert": "test"}
         test_socket = TestSocket(test_message)
-        self.assertEqual(get_message(test_socket, self.CONFIGS), {'response': '200', 'alert': 'test'})
+        self.assertEqual(get_message
+                         (test_socket, self.CONFIGS),
+                         {'response': '200', 'alert': 'test'})
 
 
 if __name__ == '__main__':

@@ -21,15 +21,19 @@ class ClientTestCase(unittest.TestCase):
     test_correct_message = f'200: OK, Привет, клиент!'
 
     def test_error_response(self):
-        self.assertEqual(Client.check_response(Client(), self.bad_message, self.CONFIGS), self.test_error_message)
+        self.assertEqual(Client.check_response(
+            Client(),
+            self.bad_message,
+            self.CONFIGS),
+            self.test_error_message
+        )
 
     def test_correct_response(self):
-        self.assertEqual(Client.check_response(Client(), self.good_message, self.CONFIGS), self.test_correct_message)
-
-    # не работает пока (после реализации клиента через класс)
-    # def test_no_response(self):
-    #     self.assertRaises(ValueError, Client.check_response(Client(), 'some message', self.CONFIGS),
-    #                       {self.CONFIGS.get('ERROR'): 'Bad request'})
+        self.assertEqual(Client.check_response(
+            Client(),
+            self.good_message,
+            self.CONFIGS
+        ), self.test_correct_message)
 
 
 if __name__ == '__main__':

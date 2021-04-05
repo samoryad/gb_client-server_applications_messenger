@@ -6,6 +6,7 @@ class DelUserDialog(QDialog):
     """
     Класс - диалог выбора контакта для удаления.
     """
+
     def __init__(self, database, server):
         super().__init__()
         self.database = database
@@ -39,7 +40,8 @@ class DelUserDialog(QDialog):
 
     def all_users_fill(self):
         """Метод заполняющий список пользователей."""
-        self.selector.addItems([item[0] for item in self.database.users_list()])
+        self.selector.addItems([item[0]
+                               for item in self.database.users_list()])
 
     def remove_user(self):
         """Метод - обработчик удаления пользователя."""

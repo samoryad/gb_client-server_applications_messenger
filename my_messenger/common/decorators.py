@@ -25,7 +25,8 @@ def log(func_to_log):
     """
     def log_saver(*args, **kwargs):
         LOGGER.debug(
-            f'Была вызвана функция {func_to_log.__name__} c параметрами {args} , {kwargs}. '
+            f'Была вызвана функция {func_to_log.__name__} '
+            f'c параметрами {args} , {kwargs}. '
             f'Вызов из модуля {func_to_log.__module__}')
         ret = func_to_log(*args, **kwargs)
         return ret
@@ -34,11 +35,18 @@ def log(func_to_log):
 
 
 class Log():
+    """
+    Декоратор, выполняющий логирование вызовов функций.
+    Сохраняет события типа info, содержащие
+    информацию о имени вызываемой функиции, параметры с которыми
+    вызывается функция, и модуль, вызывающий функцию.
+    """
     def __call__(self, func):
         @wraps(func)
         def decorated(*args, **kwargs):
             LOGGER.info(
-                f'Функция {func.__name__} вызвана из функции {traceback.format_stack()[0].strip().split()[-1]}.'
+                f'Функция {func.__name__} вызвана из функции '
+                f'{traceback.format_stack()[0].strip().split()[-1]}.'
             )
             # Декорированная функция
             res = func(*args, **kwargs)
@@ -75,7 +83,8 @@ def login_required(func):
             # сообщение. Если presence, то разрешаем
             for arg in args:
                 if isinstance(arg, dict):
-                    if CONFIGS['ACTION'] in arg and arg[CONFIGS['ACTION']] == CONFIGS['PRESENCE']:
+                    if CONFIGS['ACTION'] in arg and \
+                            arg[CONFIGS['ACTION']] == CONFIGS['PRESENCE']:
                         found = True
             # Если не не авторизован и не сообщение начала авторизации, то
             # вызываем исключение.

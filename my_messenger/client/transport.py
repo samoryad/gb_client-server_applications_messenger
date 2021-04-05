@@ -60,7 +60,8 @@ class ClientTransport(threading.Thread, QObject):
             if err.errno:
                 client_logger.critical(f'Потеряно соединение с сервером.')
                 raise ServerError('Потеряно соединение с сервером!')
-            client_logger.error('Timeout соединения при обновлении списков пользователей.')
+            client_logger.error(
+                'Timeout соединения при обновлении списков пользователей.')
         except json.JSONDecodeError:
             client_logger.critical(f'Потеряно соединение с сервером.')
             raise ServerError('Потеряно соединение с сервером!')
@@ -75,7 +76,8 @@ class ClientTransport(threading.Thread, QObject):
         # Таймаут необходим для освобождения сокета.
         self.transport.settimeout(5)
 
-        # Соединяемся, 5 попыток соединения, флаг успеха ставим в True если удалось
+        # Соединяемся, 5 попыток соединения, флаг успеха ставим в True если
+        # удалось
         connected = False
         for i in range(5):
             client_logger.info(f'Попытка подключения №{i + 1}')
@@ -91,7 +93,8 @@ class ClientTransport(threading.Thread, QObject):
 
         # Если соединится не удалось - исключение
         if not connected:
-            client_logger.critical('Не удалось установить соединение с сервером')
+            client_logger.critical(
+                'Не удалось установить соединение с сервером')
             raise ServerError('Не удалось установить соединение с сервером')
 
         client_logger.debug('Starting auth dialog.')
@@ -114,7 +117,7 @@ class ClientTransport(threading.Thread, QObject):
                 CONFIGS.get('ACTION'): CONFIGS.get('PRESENCE'),
                 CONFIGS.get('TIME'): time.time(),
                 CONFIGS.get('USER'): {
-                CONFIGS.get('ACCOUNT_NAME'): self.username,
+                    CONFIGS.get('ACCOUNT_NAME'): self.username,
                     CONFIGS.get('PUBLIC_KEY'): pubkey
                 }
             }
@@ -132,13 +135,17 @@ class ClientTransport(threading.Thread, QObject):
                         # Если всё нормально, то продолжаем процедуру
                         # авторизации.
                         ans_data = ans[CONFIGS.get('DATA')]
-                        hash = hmac.new(passwd_hash_string, ans_data.encode('utf-8'), 'MD5')
+                        hash = hmac.new(
+                            passwd_hash_string,
+                            ans_data.encode('utf-8'),
+                            'MD5')
                         digest = hash.digest()
                         my_ans = RESPONSE_511
                         my_ans[CONFIGS.get('DATA')] = binascii.b2a_base64(
                             digest).decode('ascii')
                         send_message(self.transport, my_ans, CONFIGS)
-                        self.process_server_ans(get_message(self.transport, CONFIGS))
+                        self.process_server_ans(
+                            get_message(self.transport, CONFIGS))
             except (OSError, json.JSONDecodeError) as err:
                 client_logger.debug(f'Connection error.', exc_info=err)
                 raise ServerError('Сбой соединения в процессе авторизации.')
@@ -159,22 +166,28 @@ class ClientTransport(threading.Thread, QObject):
                 self.contacts_list_update()
                 self.message_205.emit()
             else:
-                client_logger.debug(f'Принят неизвестный код подтверждения {CONFIGS.get("RESPONSE")}')
+                client_logger.debug(
+                    f'Принят неизвестный код подтверждения '
+                    f'{CONFIGS.get("RESPONSE")}')
 
-        # Если это сообщение от пользователя добавляем в базу, даём сигнал о новом сообщении
-        elif CONFIGS.get('ACTION') in message and message[CONFIGS.get('ACTION')] == CONFIGS.get(
-                'MESSAGE') and CONFIGS.get('FROM_USER') in message and CONFIGS.get(
-            'TO_USER') in message and CONFIGS.get('MESSAGE_TEXT') in message and message[
-                CONFIGS.get('TO_USER')] == self.username:
+        # Если это сообщение от пользователя добавляем в базу, даём сигнал о
+        # новом сообщении
+        elif CONFIGS.get('ACTION') in message and \
+                message[CONFIGS.get('ACTION')] == CONFIGS.get('MESSAGE') and \
+                CONFIGS.get('FROM_USER') in message and CONFIGS.get('TO_USER')\
+                in message and CONFIGS.get('MESSAGE_TEXT') in message and \
+                message[CONFIGS.get('TO_USER')] == self.username:
             client_logger.debug(
-                f'Получено сообщение от пользователя {message[CONFIGS.get("FROM_USER")]}:'
+                f'Получено сообщение от пользователя '
+                f'{message[CONFIGS.get("FROM_USER")]}:'
                 f'{message[CONFIGS.get("MESSAGE_TEXT")]}')
             self.new_message.emit(message)
 
     def contacts_list_update(self):
         """Метод обновляющий с сервера список контактов."""
         self.database.contacts_clear()
-        client_logger.debug(f'Запрос контакт листа для пользователся {self.name}')
+        client_logger.debug(
+            f'Запрос контакт листа для пользователся {self.name}')
         req = {
             CONFIGS.get('ACTION'): CONFIGS.get('GET_CONTACTS'),
             CONFIGS.get('TIME'): time.time(),
@@ -185,7 +198,8 @@ class ClientTransport(threading.Thread, QObject):
             send_message(self.transport, req, CONFIGS)
             ans = get_message(self.transport, CONFIGS)
         client_logger.debug(f'Получен ответ {ans}')
-        if CONFIGS.get('RESPONSE') in ans and ans[CONFIGS.get('RESPONSE')] == 202:
+        if CONFIGS.get(
+                'RESPONSE') in ans and ans[CONFIGS.get('RESPONSE')] == 202:
             for contact in ans[CONFIGS.get('LIST_INFO')]:
                 self.database.add_contact(contact)
         else:
@@ -193,7 +207,8 @@ class ClientTransport(threading.Thread, QObject):
 
     def user_list_update(self):
         """Метод обновляющий с сервера список пользователей."""
-        client_logger.debug(f'Запрос списка известных пользователей {self.username}')
+        client_logger.debug(
+            f'Запрос списка известных пользователей {self.username}')
         req = {
             CONFIGS.get('ACTION'): CONFIGS.get('USERS_REQUEST'),
             CONFIGS.get('TIME'): time.time(),
@@ -202,10 +217,12 @@ class ClientTransport(threading.Thread, QObject):
         with socket_lock:
             send_message(self.transport, req, CONFIGS)
             ans = get_message(self.transport, CONFIGS)
-        if CONFIGS.get('RESPONSE') in ans and ans[CONFIGS.get('RESPONSE')] == 202:
+        if CONFIGS.get(
+                'RESPONSE') in ans and ans[CONFIGS.get('RESPONSE')] == 202:
             self.database.add_users(ans[CONFIGS.get('LIST_INFO')])
         else:
-            client_logger.error('Не удалось обновить список известных пользователей.')
+            client_logger.error(
+                'Не удалось обновить список известных пользователей.')
 
     def key_request(self, user):
         """Метод запрашивающий с сервера публичный ключ пользователя."""
@@ -218,7 +235,8 @@ class ClientTransport(threading.Thread, QObject):
         with socket_lock:
             send_message(self.transport, req, CONFIGS)
             ans = get_message(self.transport, CONFIGS)
-        if CONFIGS.get('RESPONSE') in ans and ans[CONFIGS.get('RESPONSE')] == 511:
+        if CONFIGS.get(
+                'RESPONSE') in ans and ans[CONFIGS.get('RESPONSE')] == 511:
             return ans[CONFIGS.get('DATA')]
         else:
             client_logger.error(f'Не удалось получить ключ собеседника{user}.')
@@ -287,7 +305,8 @@ class ClientTransport(threading.Thread, QObject):
         client_logger.debug('Запущен процесс - приёмник собщений с сервера.')
         while self.running:
             # Отдыхаем секунду и снова пробуем захватить сокет.
-            # если не сделать тут задержку, то отправка может достаточно долго ждать освобождения сокета.
+            # если не сделать тут задержку, то отправка может достаточно долго
+            # ждать освобождения сокета.
             time.sleep(1)
             message = None
             with socket_lock:
@@ -296,11 +315,13 @@ class ClientTransport(threading.Thread, QObject):
                     message = get_message(self.transport, CONFIGS)
                 except OSError as err:
                     if err.errno:
-                        client_logger.critical(f'Потеряно соединение с сервером.')
+                        client_logger.critical(
+                            f'Потеряно соединение с сервером.')
                         self.running = False
                         self.connection_lost.emit()
                 # Проблемы с соединением
-                except (ConnectionError, ConnectionAbortedError, ConnectionResetError, json.JSONDecodeError, TypeError):
+                except (ConnectionError, ConnectionAbortedError,
+                        ConnectionResetError, json.JSONDecodeError, TypeError):
                     client_logger.debug(f'Потеряно соединение с сервером.')
                     self.running = False
                     self.connection_lost.emit()
@@ -309,5 +330,6 @@ class ClientTransport(threading.Thread, QObject):
 
                 # Если сообщение получено, то вызываем функцию обработчик:
                 if message:
-                    client_logger.debug(f'Принято сообщение с сервера: {message}')
+                    client_logger.debug(
+                        f'Принято сообщение с сервера: {message}')
                     self.process_server_ans(message)

@@ -1,15 +1,17 @@
 import os
 import sys
 import argparse
+
 from Cryptodome.PublicKey import RSA
 from PyQt5.QtWidgets import QApplication, QMessageBox
+
 from common.utils import get_configs
+from common.decorators import log
+from common.errors import ServerError
 from log.client_log_config import client_logger
 from client.main_window import ClientMainWindow
 from client.start_dialog import UserNameDialog
 from client.transport import ClientTransport
-from common.decorators import log
-from common.errors import ServerError
 from client.database import ClientDatabase
 
 CONFIGS = get_configs()
@@ -22,12 +24,38 @@ def arg_parser():
     адрес сервера, порт, имя пользователя, пароль.
     Выполняет проверку на корректность номера порта.
     """
-    parser = argparse.ArgumentParser(description='command line client parameters')
-    parser.add_argument('addr', type=str, nargs='?', default=CONFIGS.get('DEFAULT_IP_ADDRESS'),
-                        help='server ip address')
-    parser.add_argument('port', type=int, nargs='?', default=CONFIGS.get('DEFAULT_PORT'), help='port')
-    parser.add_argument('-n', '--name', type=str, default=None, nargs='?', help='client name')
-    parser.add_argument('-p', '--password', default='', nargs='?', help='client password')
+    parser = argparse.ArgumentParser(
+        description='command line client parameters'
+    )
+    parser.add_argument(
+        'addr',
+        type=str,
+        nargs='?',
+        default=CONFIGS.get('DEFAULT_IP_ADDRESS'),
+        help='server ip address'
+    )
+    parser.add_argument(
+        'port',
+        type=int,
+        nargs='?',
+        default=CONFIGS.get('DEFAULT_PORT'),
+        help='port'
+    )
+    parser.add_argument(
+        '-n',
+        '--name',
+        type=str,
+        default=None,
+        nargs='?',
+        help='client name'
+    )
+    parser.add_argument(
+        '-p',
+        '--password',
+        default='',
+        nargs='?',
+        help='client password'
+    )
     args = parser.parse_args()
     server_address = args.addr
     server_port = args.port
@@ -37,7 +65,8 @@ def arg_parser():
     # проверим подходящий номер порта
     if not 1023 < server_port < 65536:
         client_logger.critical(
-            f'Попытка запуска клиента с неподходящим номером порта: {server_port}. '
+            f'Попытка запуска клиента с неподходящим номером порта: '
+            f'{server_port}. '
             f'Допустимы адреса с 1024 до 65535. Клиент завершается.')
         exit(1)
 
@@ -57,11 +86,13 @@ if __name__ == '__main__':
     start_dialog = UserNameDialog()
     if not client_name or not client_passwd:
         client_app.exec_()
-        # Если пользователь ввёл имя и нажал ОК, то сохраняем ведённое и удаляем объект, иначе выходим
+        # Если пользователь ввёл имя и нажал ОК, то сохраняем ведённое и
+        # удаляем объект, иначе выходим
         if start_dialog.ok_pressed:
             client_name = start_dialog.client_name.text()
             client_passwd = start_dialog.client_passwd.text()
-            client_logger.debug(f'Using USERNAME = {client_name}, PASSWD = {client_passwd}.')
+            client_logger.debug(f'Using USERNAME = {client_name}, '
+                                f'PASSWD = {client_passwd}.')
         else:
             exit(0)
 

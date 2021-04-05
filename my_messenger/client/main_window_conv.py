@@ -93,15 +93,30 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Чат программа"))
-        self.label_contacts.setText(_translate("MainWindow", "Список контактов:"))
-        self.btn_add_contact.setText(_translate("MainWindow", "Добавить контакт"))
-        self.btn_remove_contact.setText(_translate("MainWindow", "Удалить контакт"))
-        self.label_history.setText(_translate("MainWindow", "История сообщений:"))
-        self.label_new_message.setText(_translate("MainWindow", "Введите новое сообщение"))
+        self.label_contacts.setText(
+            _translate(
+                "MainWindow",
+                "Список контактов:"))
+        self.btn_add_contact.setText(
+            _translate(
+                "MainWindow",
+                "Добавить контакт"))
+        self.btn_remove_contact.setText(
+            _translate("MainWindow", "Удалить контакт"))
+        self.label_history.setText(
+            _translate(
+                "MainWindow",
+                "История сообщений:"))
+        self.label_new_message.setText(
+            _translate(
+                "MainWindow",
+                "Введите новое сообщение"))
         self.btn_send.setText(_translate("MainWindow", "Отправить сообщение"))
         self.btn_clear.setText(_translate("MainWindow", "Очистить поле"))
         self.menu.setTitle(_translate("MainWindow", "Файл"))
         self.menu_2.setTitle(_translate("MainWindow", "Контакты"))
         self.menu_exit.setText(_translate("MainWindow", "Выход"))
-        self.menu_add_contact.setText(_translate("MainWindow", "Добавить контакт"))
-        self.menu_del_contact.setText(_translate("MainWindow", "Удалить контакт"))
+        self.menu_add_contact.setText(
+            _translate("MainWindow", "Добавить контакт"))
+        self.menu_del_contact.setText(
+            _translate("MainWindow", "Удалить контакт"))

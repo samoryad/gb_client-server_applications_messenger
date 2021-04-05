@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication, QLabel, QTableView
+from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QLabel, QTableView
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import QTimer
+
 from my_messenger.server.stat_window import StatWindow
 from my_messenger.server.config_window import ConfigWindow
 from my_messenger.server.add_user import RegisterUser
@@ -98,7 +99,8 @@ class MainWindow(QMainWindow):
             ip.setEditable(False)
             port = QStandardItem(str(port))
             port.setEditable(False)
-            # Уберём милисекунды из строки времени, т.к. такая точность не требуется.
+            # Уберём милисекунды из строки времени, т.к. такая точность не
+            # требуется.
             time = QStandardItem(str(time.replace(microsecond=0)))
             time.setEditable(False)
             list.appendRow([user, ip, port, time])

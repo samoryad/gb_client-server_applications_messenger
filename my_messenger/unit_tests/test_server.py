@@ -33,7 +33,11 @@ class ServerTestCase(unittest.TestCase):
                 'status': 'Привет, сервер!'
             }
         }
-        self.assertEqual(check_presence_message(test_message, self.CONFIGS), self.test_correct_message)
+        self.assertEqual(check_presence_message(
+            test_message,
+            self.CONFIGS
+        ),
+            self.test_correct_message)
 
     def test_check_message_wrong_user(self):
         test_message = {
@@ -45,7 +49,9 @@ class ServerTestCase(unittest.TestCase):
                 'status': 'Привет, сервер!'
             }
         }
-        self.assertEqual(check_presence_message(test_message, self.CONFIGS), self.test_error_message)
+        self.assertEqual(check_presence_message
+                         (test_message, self.CONFIGS),
+                         self.test_error_message)
 
 
 if __name__ == '__main__':

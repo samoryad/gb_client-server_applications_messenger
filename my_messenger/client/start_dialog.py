@@ -6,6 +6,7 @@ class UserNameDialog(QDialog):
     Класс реализующий стартовый диалог с запросом логина и пароля
     пользователя.
     """
+
     def __init__(self):
         super().__init__()
 

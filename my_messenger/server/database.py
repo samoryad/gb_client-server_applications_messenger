@@ -1,6 +1,8 @@
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey, DateTime, Text
-from sqlalchemy.orm import mapper, sessionmaker
 import datetime
+
+from sqlalchemy import create_engine, Table, Column, Integer, String, \
+    MetaData, ForeignKey, DateTime, Text
+from sqlalchemy.orm import mapper, sessionmaker
 
 
 class ServerStorage:
@@ -132,16 +134,17 @@ class ServerStorage:
 
     def user_login(self, username, ip_address, port, key):
         """
-        Метод выполняющийся при входе пользователя, записывает в базу факт входа
+        Метод выполняющийся при входе пользователя, записывает в базу
+        факт входа
         Обновляет открытый ключ пользователя при его изменении.
         """
         # Запрос в таблицу пользователей на наличие там пользователя с таким
         # именем
         rez = self.session.query(self.AllUsers).filter_by(name=username)
 
-        # Если имя пользователя уже присутствует в таблице, обновляем время последнего входа
-        # и проверяем корректность ключа. Если клиент прислал новый ключ,
-        # сохраняем его.
+        # Если имя пользователя уже присутствует в таблице, обновляем
+        # время последнего входа и проверяем корректность ключа.
+        # Если клиент прислал новый ключ, сохраняем его.
         if rez.count():
             user = rez.first()
             user.last_login = datetime.datetime.now()
@@ -183,7 +186,9 @@ class ServerStorage:
         self.session.query(self.ActiveUsers).filter_by(user=user.id).delete()
         self.session.query(self.LoginHistory).filter_by(name=user.id).delete()
         self.session.query(self.UsersContacts).filter_by(user=user.id).delete()
-        self.session.query(self.UsersContacts).filter_by(contact=user.id).delete()
+        self.session.query(
+            self.UsersContacts).filter_by(
+            contact=user.id).delete()
         self.session.query(self.UsersHistory).filter_by(user=user.id).delete()
         self.session.query(self.AllUsers).filter_by(name=name).delete()
         self.session.commit()
@@ -221,12 +226,20 @@ class ServerStorage:
     def process_message(self, sender, recipient):
         """Метод записывающий в таблицу статистики факт передачи сообщения."""
         # Получаем ID отправителя и получателя
-        sender = self.session.query(self.AllUsers).filter_by(name=sender).first().id
-        recipient = self.session.query(self.AllUsers).filter_by(name=recipient).first().id
+        sender = self.session.query(
+            self.AllUsers).filter_by(
+            name=sender).first().id
+        recipient = self.session.query(
+            self.AllUsers).filter_by(
+            name=recipient).first().id
         # Запрашиваем строки из истории и увеличиваем счётчики
-        sender_row = self.session.query(self.UsersHistory).filter_by(user=sender).first()
+        sender_row = self.session.query(
+            self.UsersHistory).filter_by(
+            user=sender).first()
         sender_row.sent += 1
-        recipient_row = self.session.query(self.UsersHistory).filter_by(user=recipient).first()
+        recipient_row = self.session.query(
+            self.UsersHistory).filter_by(
+            user=recipient).first()
         recipient_row.accepted += 1
 
         self.session.commit()
@@ -235,7 +248,9 @@ class ServerStorage:
         """Метод добавления контакта для пользователя."""
         # Получаем ID пользователей
         user = self.session.query(self.AllUsers).filter_by(name=user).first()
-        contact = self.session.query(self.AllUsers).filter_by(name=contact).first()
+        contact = self.session.query(
+            self.AllUsers).filter_by(
+            name=contact).first()
 
         # Проверяем что не дубль и что контакт может существовать (полю
         # пользователь мы доверяем)
@@ -253,7 +268,9 @@ class ServerStorage:
         """Метод удаления контакта пользователя."""
         # Получаем ID пользователей
         user = self.session.query(self.AllUsers).filter_by(name=user).first()
-        contact = self.session.query(self.AllUsers).filter_by(name=contact).first()
+        contact = self.session.query(
+            self.AllUsers).filter_by(
+            name=contact).first()
 
         # Проверяем что контакт может существовать (полю пользователь мы
         # доверяем)
@@ -268,7 +285,10 @@ class ServerStorage:
         self.session.commit()
 
     def users_list(self):
-        """Метод возвращающий список известных пользователей со временем последнего входа."""
+        """
+        Метод возвращающий список известных пользователей со
+        временем последнего входа.
+        """
         # Запрос строк таблицы пользователей.
         query = self.session.query(
             self.AllUsers.name,
